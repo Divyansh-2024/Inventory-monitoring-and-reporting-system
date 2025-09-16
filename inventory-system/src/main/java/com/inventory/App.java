@@ -1,6 +1,6 @@
-package com.inventory.model;
+package com.inventory;
+import com.inventory.model.Product;
 import com.inventory.services.InventoryManager;  
-
 import java.util.Scanner;
 
 public class App {
@@ -9,7 +9,9 @@ public class App {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n--- Inventory Menu ---");
+            System.out.println("\n==========================");
+            System.out.println("----- Inventory Menu -----");
+            System.out.println("==========================");
             System.out.println("1. Add Product");
             System.out.println("2. Remove Product");
             System.out.println("3. Update Product Quantity");

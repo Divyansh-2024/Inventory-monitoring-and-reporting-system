@@ -2,12 +2,11 @@ package com.inventory.dao;
 
 import com.inventory.model.Product;
 import com.inventory.utility.DBConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class daoProduct {
+public class Productdao {
 
     // CREATE
     public void addProduct(Product product) {
@@ -19,8 +18,8 @@ public class daoProduct {
             stmt.setString(2, product.getName());
             stmt.setInt(3, product.getQuantity());
             stmt.setDouble(4, product.getPrice());
-
             stmt.executeUpdate();
+
             System.out.println("✅ Product added with ID: " + product.getId());
         } catch (SQLException e) {
             e.printStackTrace();
@@ -50,7 +49,7 @@ public class daoProduct {
         return products;
     }
 
-    // UPDATE by id
+    // UPDATE
     public void updateProduct(Product product) {
         String sql = "UPDATE products SET name=?, quantity=?, price=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
@@ -62,17 +61,14 @@ public class daoProduct {
             stmt.setInt(4, product.getId());
 
             int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                System.out.println("✅ Product updated with ID: " + product.getId());
-            } else {
-                System.out.println("⚠️ No product found with ID: " + product.getId());
-            }
+            if (rows > 0) System.out.println("✅ Product updated with ID: " + product.getId());
+            else System.out.println("⚠️ No product found with ID: " + product.getId());
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // DELETE by id
+    // DELETE
     public void deleteProduct(int id) {
         String sql = "DELETE FROM products WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
@@ -80,12 +76,8 @@ public class daoProduct {
 
             stmt.setInt(1, id);
             int rows = stmt.executeUpdate();
-
-            if (rows > 0) {
-                System.out.println("🗑 Product deleted with ID: " + id);
-            } else {
-                System.out.println("⚠️ No product found with ID: " + id);
-            }
+            if (rows > 0) System.out.println("🗑 Product deleted with ID: " + id);
+            else System.out.println("⚠️ No product found with ID: " + id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
