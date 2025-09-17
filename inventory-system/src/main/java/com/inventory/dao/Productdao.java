@@ -19,10 +19,10 @@ public class Productdao {
             stmt.setInt(3, product.getQuantity());
             stmt.setDouble(4, product.getPrice());
             stmt.executeUpdate();
-
             System.out.println("✅ Product added with ID: " + product.getId());
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("❌ Error adding product: " + e.getMessage());
         }
     }
 
@@ -35,16 +35,15 @@ public class Productdao {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                Product p = new Product(
+                products.add(new Product(
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getInt("quantity"),
                         rs.getDouble("price")
-                );
-                products.add(p);
+                ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("❌ Error fetching products: " + e.getMessage());
         }
         return products;
     }
@@ -59,12 +58,14 @@ public class Productdao {
             stmt.setInt(2, product.getQuantity());
             stmt.setDouble(3, product.getPrice());
             stmt.setInt(4, product.getId());
-
             int rows = stmt.executeUpdate();
-            if (rows > 0) System.out.println("✅ Product updated with ID: " + product.getId());
-            else System.out.println("⚠️ No product found with ID: " + product.getId());
+            if (rows > 0)
+                System.out.println("✅ Product updated with ID: " + product.getId());
+            else
+                System.out.println("⚠️ No product found with ID: " + product.getId());
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("❌ Error updating product: " + e.getMessage());
         }
     }
 
@@ -76,10 +77,13 @@ public class Productdao {
 
             stmt.setInt(1, id);
             int rows = stmt.executeUpdate();
-            if (rows > 0) System.out.println("🗑 Product deleted with ID: " + id);
-            else System.out.println("⚠️ No product found with ID: " + id);
+            if (rows > 0)
+                System.out.println("🗑 Product deleted with ID: " + id);
+            else
+                System.out.println("⚠️ No product found with ID: " + id);
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("❌ Error deleting product: " + e.getMessage());
         }
     }
 }

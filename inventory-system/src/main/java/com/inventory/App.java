@@ -18,7 +18,7 @@ public class App {
             System.out.println("4. Search Product");
             System.out.println("5. Display All Products");
             System.out.println("6. Exit");
-            System.out.print("Choose an option: ");
+            System.out.print("Choose an option (1-6): ");
 
             int choice = sc.nextInt();
             sc.nextLine(); 
