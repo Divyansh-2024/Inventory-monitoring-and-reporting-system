@@ -30,12 +30,14 @@ public class App {
                     sc.nextLine();
                     System.out.print("Enter product name: ");
                     String name = sc.nextLine();
+                    System.out.print("Enter product category: ");
+                    String category = sc.nextLine();
                     System.out.print("Enter quantity: ");
                     int qty = sc.nextInt();
                     System.out.print("Enter price: ");
                     double price = sc.nextDouble();
-                    manager.addProduct(new Product(id, name, qty, price));
-                    break;
+                    manager.addProduct(new Product(id, name, category , qty, price));
+                    break; 
 
                 case 2:
                     System.out.print("Enter product ID to remove: ");
@@ -63,7 +65,7 @@ public class App {
                     break;
 
                 case 6:
-                    System.out.println("Exiting...");
+                    System.out.println("Exited Successfully...");
                     sc.close();
                     System.exit(0);
 

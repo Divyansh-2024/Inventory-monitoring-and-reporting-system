@@ -10,14 +10,15 @@ public class Productdao {
 
     // CREATE
     public void addProduct(Product product) {
-        String sql = "INSERT INTO products (id, name, quantity, price) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO products (id, name, category, quantity, price) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, product.getId());
             stmt.setString(2, product.getName());
-            stmt.setInt(3, product.getQuantity());
-            stmt.setDouble(4, product.getPrice());
+            stmt.setString(3, product.getCategory());           
+            stmt.setInt(4, product.getQuantity());
+            stmt.setDouble(5, product.getPrice());
             stmt.executeUpdate();
             System.out.println("✅ Product added with ID: " + product.getId());
 
@@ -38,6 +39,7 @@ public class Productdao {
                 products.add(new Product(
                         rs.getInt("id"),
                         rs.getString("name"),
+                        rs.getString("category"),
                         rs.getInt("quantity"),
                         rs.getDouble("price")
                 ));
@@ -55,6 +57,7 @@ public class Productdao {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, product.getName());
+            stmt.setString(1, product.getCategory());
             stmt.setInt(2, product.getQuantity());
             stmt.setDouble(3, product.getPrice());
             stmt.setInt(4, product.getId());

@@ -6,6 +6,7 @@ USE dbstore;
 CREATE TABLE IF NOT EXISTS products (
     id INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    category VARCHAR(50), 
     quantity INT NOT NULL,
     price DOUBLE NOT NULL
 );
@@ -14,7 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE USER IF NOT EXISTS 'testuser'@'localhost' IDENTIFIED BY 'Password@123';
 
 -- 6. Grant privileges on inventorydb to new user
-GRANT ALL PRIVILEGES ON inventorydb.* TO 'testuser'@'localhost';
+GRANT ALL PRIVILEGES ON dbstore.* TO 'testuser'@'localhost';
 
 -- 7. Apply privileges
 FLUSH PRIVILEGES;
