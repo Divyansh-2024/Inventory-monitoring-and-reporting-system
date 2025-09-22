@@ -1,8 +1,8 @@
-
 package com.inventory.services;
 
 import com.inventory.model.Product;
 import com.inventory.dao.Productdao;
+import com.inventory.exceptions.ProductNotFoundException;
 import java.util.List;
 
 public class InventoryManager {
@@ -14,52 +14,59 @@ public class InventoryManager {
     }
 
     // Add product
-    public void addProduct(Product product) {
+    public void addProduct(Product product) throws Exception {
+        // Optional: check if product already exists
+        List<Product> products = productdao.getAllProducts();
+        for (Product p : products) {
+            if (p.getId() == product.getId()) {
+                throw new Exception("Product with ID " + product.getId() + " already exists.");
+            }
+        }
         productdao.addProduct(product);
     }
 
     // Remove product
-    public void removeProduct(int id) {
-        productdao.deleteProduct(id);
+    public void removeProduct(int id) throws ProductNotFoundException {
+        if (!productdao.deleteProduct(id)) {
+            throw new ProductNotFoundException("Product not found with ID: " + id);
+        }
     }
 
     // Update product quantity
-    public void updateProductQty(int id, int qty) {
-       List<Product> products=productdao.getAllProducts();
-
-       for(Product p:products){
-            if(p.getId()==id){
+    public void updateProductQty(int id, int qty) throws ProductNotFoundException {
+       List<Product> products = productdao.getAllProducts();
+       for(Product p : products){
+            if(p.getId() == id){
                 p.setQuantity(qty);
                 productdao.updateProduct(p);
                 return;
             }
         }
-        System.out.println("Product not found with this ID.");
+        throw new ProductNotFoundException("Product not found with ID: " + id);
     }
 
     // Search product by name
-    public void searchProduct(String name) {
+    public Product searchProduct(String name) throws ProductNotFoundException {
         List<Product> products = productdao.getAllProducts();
-        boolean found = false;
         for (Product p : products) {
             if (p.getName().equalsIgnoreCase(name)) {
-                System.out.println(p);
-                found = true;
+                return p;
             }
         }
-        if (!found) System.out.println("❌ Product not found!");
+        throw new ProductNotFoundException("Product not found with name: " + name);
     }
 
     // Display all products
     public void displayInventory() {
-        List<Product> products = productdao.getAllProducts();
-        if (products.isEmpty()) {
-            System.out.println("⚠️ Inventory is empty.");
-        } else {
-            System.out.println("📦 Current Inventory:");
-            for (Product p : products) {
-                System.out.println(p);
-            }
+    List<Product> products = productdao.getAllProducts();
+    if (products.isEmpty()) {
+        System.out.println("⚠️ Inventory is empty.");
+    } else {
+        System.out.println("📦 Current Inventory:");
+        for (Product p : products) {
+            System.out.println(p);
         }
     }
+}
+
 }

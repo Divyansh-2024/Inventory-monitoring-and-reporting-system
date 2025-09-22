@@ -1,6 +1,8 @@
 package com.inventory;
+
+import com.inventory.exceptions.ProductNotFoundException;
 import com.inventory.model.Product;
-import com.inventory.services.InventoryManager;  
+import com.inventory.services.InventoryManager;
 import java.util.Scanner;
 
 public class App {
@@ -21,43 +23,64 @@ public class App {
             System.out.print("Choose an option (1-6): ");
 
             int choice = sc.nextInt();
-            sc.nextLine(); 
+            sc.nextLine();
 
             switch (choice) {
                 case 1:
-                    System.out.print("Enter product ID: ");
-                    int id = sc.nextInt();
-                    sc.nextLine();
-                    System.out.print("Enter product name: ");
-                    String name = sc.nextLine();
-                    System.out.print("Enter product category: ");
-                    String category = sc.nextLine();
-                    System.out.print("Enter quantity: ");
-                    int qty = sc.nextInt();
-                    System.out.print("Enter price: ");
-                    double price = sc.nextDouble();
-                    manager.addProduct(new Product(id, name, category , qty, price));
-                    break; 
+                    try {
+                        System.out.print("Enter product ID: ");
+                        int id = sc.nextInt();
+                        sc.nextLine();
+                        System.out.print("Enter product name: ");
+                        String name = sc.nextLine();
+                        System.out.print("Enter product category: ");
+                        String category = sc.nextLine();
+                        System.out.print("Enter quantity: ");
+                        int qty = sc.nextInt();
+                        System.out.print("Enter price: ");
+                        double price = sc.nextDouble();
+
+                        manager.addProduct(new Product(id, name, category, qty, price));
+                        System.out.println("✅ Product added successfully!");
+                    } catch (Exception e) {
+                        System.out.println("❌ " + e.getMessage());
+                    }
+                    break;
 
                 case 2:
                     System.out.print("Enter product ID to remove: ");
-                    id = sc.nextInt();
-                    manager.removeProduct(id);
+                    int id = sc.nextInt();
+                    try {
+                        manager.removeProduct(id);
+                        System.out.println("🗑 Product removed successfully!");
+                    } catch (ProductNotFoundException e) {
+                        System.out.println("❌ " + e.getMessage());
+                    }
                     break;
 
                 case 3:
                     System.out.print("Enter product ID to update: ");
-                    id = sc.nextInt();
+                     id = sc.nextInt();
                     System.out.print("Enter new quantity: ");
-                    qty = sc.nextInt();
-                    manager.updateProductQty(id, qty);
+                    int qty = sc.nextInt();
+                    try {
+                        manager.updateProductQty(id, qty);
+                        System.out.println("✅ Quantity updated successfully!");
+                    } catch (ProductNotFoundException e) {
+                        System.out.println("❌ " + e.getMessage());
+                    }
                     break;
 
                 case 4:
-                    sc.nextLine();
+                    sc.nextLine(); // consume newline
                     System.out.print("Enter product name to search: ");
-                    name = sc.nextLine();
-                    manager.searchProduct(name);
+                    String name = sc.nextLine();
+                    try {
+                        Product p = manager.searchProduct(name);
+                        System.out.println(p);
+                    } catch (ProductNotFoundException e) {
+                        System.out.println("❌ " + e.getMessage());
+                    }
                     break;
 
                 case 5:

@@ -12,11 +12,11 @@ public class Productdao {
     public void addProduct(Product product) {
         String sql = "INSERT INTO products (id, name, category, quantity, price) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, product.getId());
             stmt.setString(2, product.getName());
-            stmt.setString(3, product.getCategory());           
+            stmt.setString(3, product.getCategory());
             stmt.setInt(4, product.getQuantity());
             stmt.setDouble(5, product.getPrice());
             stmt.executeUpdate();
@@ -32,8 +32,8 @@ public class Productdao {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM products";
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 products.add(new Product(
@@ -41,8 +41,7 @@ public class Productdao {
                         rs.getString("name"),
                         rs.getString("category"),
                         rs.getInt("quantity"),
-                        rs.getDouble("price")
-                ));
+                        rs.getDouble("price")));
             }
         } catch (SQLException e) {
             System.out.println("❌ Error fetching products: " + e.getMessage());
@@ -54,7 +53,7 @@ public class Productdao {
     public void updateProduct(Product product) {
         String sql = "UPDATE products SET name=?, quantity=?, price=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, product.getName());
             stmt.setString(1, product.getCategory());
@@ -73,20 +72,19 @@ public class Productdao {
     }
 
     // DELETE
-    public void deleteProduct(int id) {
+    public boolean deleteProduct(int id) {
         String sql = "DELETE FROM products WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             int rows = stmt.executeUpdate();
-            if (rows > 0)
-                System.out.println("🗑 Product deleted with ID: " + id);
-            else
-                System.out.println("⚠️ No product found with ID: " + id);
+            return rows > 0;
 
         } catch (SQLException e) {
             System.out.println("❌ Error deleting product: " + e.getMessage());
+            return false;
         }
     }
+
 }
