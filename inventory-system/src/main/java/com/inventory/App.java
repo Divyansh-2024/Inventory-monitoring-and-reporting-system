@@ -3,6 +3,8 @@ package com.inventory;
 import com.inventory.exceptions.ProductNotFoundException;
 import com.inventory.model.Product;
 import com.inventory.services.InventoryManager;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
@@ -60,7 +62,7 @@ public class App {
 
                 case 3:
                     System.out.print("Enter product ID to update: ");
-                     id = sc.nextInt();
+                    id = sc.nextInt();
                     System.out.print("Enter new quantity: ");
                     int qty = sc.nextInt();
                     try {
@@ -72,14 +74,45 @@ public class App {
                     break;
 
                 case 4:
+                    System.out.println("\n🔍 Search Options:");
+                    System.out.println("1. Search by ID");
+                    System.out.println("2. Search by Name");
+                    System.out.println("3. Search by Category");
+                    System.out.print("Choose an option (1-3): ");
+                    int searchChoice = sc.nextInt();
                     sc.nextLine(); // consume newline
-                    System.out.print("Enter product name to search: ");
-                    String name = sc.nextLine();
+
                     try {
-                        Product p = manager.searchProduct(name);
-                        System.out.println(p);
-                    } catch (ProductNotFoundException e) {
-                        System.out.println("❌ " + e.getMessage());
+                        switch (searchChoice) {
+                            case 1:
+                                System.out.print("Enter product ID: ");
+                                int searchId = sc.nextInt();
+                                Product p1 = manager.searchProductById(searchId);
+                                System.out.println("✅ Found: " + p1);
+                                break;
+
+                            case 2:
+                                System.out.print("Enter product name: ");
+                                String searchName = sc.nextLine();
+                                Product p2 = manager.searchProduct(searchName);
+                                System.out.println("✅ Found: " + p2);
+                                break;
+
+                            case 3:
+                                System.out.print("Enter product category: ");
+                                String searchCategory = sc.nextLine();
+                                List<Product> categoryProducts = manager.searchProductByCategory(searchCategory);
+                                System.out.println("✅ Products in category '" + searchCategory + "':");
+                                for (Product p : categoryProducts) {
+                                    System.out.println(p);
+                                }
+                                break;
+
+                            default:
+                                System.out.println("❌ Invalid search option!");
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
                     }
                     break;
 
