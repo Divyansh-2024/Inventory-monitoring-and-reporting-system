@@ -74,10 +74,11 @@ public class App {
                     break;
 
                 case 4:
-                    System.out.println("\n Search Options:");
-                    System.out.println("1. Search by ID");
-                    System.out.println("2. Search by Name");
-                    System.out.println("3. Search by Category");
+                    System.out.println("\n========== Search Options =========");
+                    System.out.println("|         1. Search by ID         |");
+                    System.out.println("|         2. Search by Name       |");
+                    System.out.println("|         3. Search by Category   |");
+                    System.out.println("===================================");
                     System.out.print("Choose an option (1-3): ");
                     int searchChoice = sc.nextInt();
                     sc.nextLine(); 
