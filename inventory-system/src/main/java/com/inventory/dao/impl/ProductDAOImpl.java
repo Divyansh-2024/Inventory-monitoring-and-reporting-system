@@ -116,4 +116,30 @@ public class ProductDAOImpl implements ProductDAO {
             return false;
         }
     }
+
+    @Override
+public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws SQLException {
+    List<Product> products = new ArrayList<>();
+    String query = "SELECT * FROM products WHERE price BETWEEN ? AND ?";
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setDouble(1, minPrice);
+        stmt.setDouble(2, maxPrice);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Product product = new Product(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("category"),
+                rs.getInt("quantity"),
+                rs.getDouble("price")
+            );
+            products.add(product);
+        }
+    }
+    return products;
+}
+
 }

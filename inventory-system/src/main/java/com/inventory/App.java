@@ -1,4 +1,5 @@
 package com.inventory;
+
 import com.inventory.exceptions.DuplicateProductException;
 import com.inventory.exceptions.InvalidProductDataException;
 import com.inventory.exceptions.ProductNotFoundException;
@@ -13,16 +14,15 @@ public class App {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-          System.out.println("\n================== INVENTORY MENU ================= ");
-          System.out.printf("| %-3s | %-42s |\n", "1️", "Add Product ");
-          System.out.printf("| %-3s | %-42s |\n", "2️", "Remove Product ");
-          System.out.printf("| %-3s | %-42s |\n", "3️", "Update Quantity ");
-          System.out.printf("| %-3s | %-42s |\n", "4️", "Search Product ");
-          System.out.printf("| %-3s | %-42s |\n", "5️", "Display All Products ");
-          System.out.printf("| %-3s | %-42s |\n", "6️", "Exit ");
-          System.out.println("===================================================");
-          System.out.print(" Choose an option (1–6): ");
-
+            System.out.println("\n================== INVENTORY MENU ================= ");
+            System.out.printf("| %-3s | %-42s |\n", "1️", "Add Product ");
+            System.out.printf("| %-3s | %-42s |\n", "2️", "Remove Product ");
+            System.out.printf("| %-3s | %-42s |\n", "3️", "Update Quantity ");
+            System.out.printf("| %-3s | %-42s |\n", "4️", "Search Product ");
+            System.out.printf("| %-3s | %-42s |\n", "5️", "Display All Products ");
+            System.out.printf("| %-3s | %-42s |\n", "6️", "Exit ");
+            System.out.println("===================================================");
+            System.out.print(" Choose an option (1–6): ");
 
             int choice = sc.nextInt();
             sc.nextLine();
@@ -43,7 +43,7 @@ public class App {
                         double price = sc.nextDouble();
 
                         manager.addProduct(new Product(id, name, category, qty, price));
-                        System.out.println(" Product added successfully!");
+                        System.out.println("Product added successfully!");
                     } catch (DuplicateProductException | InvalidProductDataException e) {
                         System.out.println(e.getMessage());
                     }
@@ -74,14 +74,15 @@ public class App {
                     break;
 
                 case 4:
-                    System.out.println("\n========== Search Options =========");
-                    System.out.println("|         1. Search by ID         |");
-                    System.out.println("|         2. Search by Name       |");
-                    System.out.println("|         3. Search by Category   |");
-                    System.out.println("===================================");
+                    System.out.println("\n============ Search Options ===========");
+                    System.out.println("|         1. Search by ID             |");
+                    System.out.println("|         2. Search by Name           |");
+                    System.out.println("|         3. Search by Category       |");
+                    System.out.println("|         4. Search by Price Range    |");
+                    System.out.println("=======================================");
                     System.out.print("Choose an option (1-3): ");
                     int searchChoice = sc.nextInt();
-                    sc.nextLine(); 
+                    sc.nextLine();
 
                     try {
                         switch (searchChoice) {
@@ -107,6 +108,14 @@ public class App {
                                 for (Product p : categoryProducts) {
                                     System.out.println(p);
                                 }
+                                break;
+
+                            case 4:
+                                System.out.print("Enter Minimum Price: ");
+                                double minPrice = sc.nextDouble();
+                                 System.out.print("Enter Maximum Price: ");
+                                double maxPrice = sc.nextDouble();
+                                manager.getProductsByPriceRange(minPrice, maxPrice);
                                 break;
 
                             default:
