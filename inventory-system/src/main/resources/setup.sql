@@ -11,6 +11,15 @@ CREATE TABLE IF NOT EXISTS products (
     price DOUBLE NOT NULL
 );
 
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user'
+);
+
+
 -- 5. Create new MySQL user for Java connection
 CREATE USER IF NOT EXISTS 'testuser'@'localhost' IDENTIFIED BY 'Password@123';
 
