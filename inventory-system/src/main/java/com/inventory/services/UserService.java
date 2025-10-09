@@ -2,6 +2,8 @@ package com.inventory.services;
 
 import com.inventory.dao.UserDAO;
 import com.inventory.dao.impl.UserDAOImpl;
+import com.inventory.exceptions.DuplicateUserException;
+import com.inventory.exceptions.InvalidCredentialsException;
 import com.inventory.model.User;
 
 import java.sql.SQLException;
@@ -14,43 +16,36 @@ public class UserService {
         this.userDAO = new UserDAOImpl();
     }
 
-    // Register a new user
-    public boolean register(String name, String password, String role) {
+    public boolean register(String username, String password, String role) throws DuplicateUserException {
         try {
-            // Check if user already exists
-            User existingUser = userDAO.getUserByUsername(name);
-            if (existingUser != null) {
-                System.out.println("⚠️ Username already exists.");
+            User existing = userDAO.getUserByUsername(username);
+            if (existing != null) {
+                System.out.println("⚠️ Username already exists!");
                 return false;
             }
 
-            // Create a User object with id=0 (DB will auto-increment)
-            User newUser = new User(0, name, password, role);
-
-            // Pass it to DAO
+            User newUser = new User(0, username, password, role);
             userDAO.addUser(newUser);
-
-            System.out.println("✅ User registered successfully!");
+            System.out.println("Registered successfully!");
             return true;
 
         } catch (SQLException e) {
-            System.out.println("❌ Database error during registration: " + e.getMessage());
+            System.out.println("Error registering user: " + e.getMessage());
             return false;
         }
     }
 
-    // Login user
-    public User login(String name, String password) {
+    public User login(String username, String password) throws InvalidCredentialsException{
         try {
-            User user = userDAO.getUserByUsername(name);
+            User user = userDAO.getUserByUsername(username);
             if (user != null && user.getPassword().equals(password)) {
-                System.out.println("✅ Login successful! Welcome " + user.getUserName());
+                System.out.println("Login successful! Welcome " + user.getUserName());
                 return user;
             } else {
-                System.out.println("❌ Invalid username or password.");
+                System.out.println("Invalid username or password!");
             }
         } catch (SQLException e) {
-            System.out.println("❌ Database error during login: " + e.getMessage());
+            System.out.println("Database error: " + e.getMessage());
         }
         return null;
     }

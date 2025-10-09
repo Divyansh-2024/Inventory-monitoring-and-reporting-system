@@ -14,11 +14,9 @@ public class UserDAOImpl implements UserDAO {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, user.getUserName());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getRole());
-
             ps.executeUpdate();
         }
     }
@@ -29,10 +27,8 @@ public class UserDAOImpl implements UserDAO {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 return new User(
                     rs.getInt("id"),
