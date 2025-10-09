@@ -23,10 +23,10 @@ public class ProductDAOImpl implements ProductDAO {
             stmt.setInt(4, product.getQuantity());
             stmt.setDouble(5, product.getPrice());
             stmt.executeUpdate();
-            System.out.println("✅ Product added with ID: " + product.getId());
+        
 
         } catch (SQLException e) {
-            System.out.println("❌ Error adding product: " + e.getMessage());
+            System.out.println("Error adding product: " + e.getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ public class ProductDAOImpl implements ProductDAO {
                         rs.getDouble("price")));
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error fetching products: " + e.getMessage());
+            System.out.println("Error fetching products: " + e.getMessage());
         }
         return products;
     }
@@ -71,7 +71,7 @@ public class ProductDAOImpl implements ProductDAO {
                         rs.getDouble("price"));
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error fetching product: " + e.getMessage());
+            System.out.println("Error fetching product: " + e.getMessage());
         }
         return null;
     }
@@ -91,12 +91,12 @@ public class ProductDAOImpl implements ProductDAO {
 
             int rows = stmt.executeUpdate();
             if (rows > 0)
-                System.out.println("✅ Product updated with ID: " + product.getId());
+                System.out.println("Product updated with ID: " + product.getId());
             else
                 System.out.println("⚠️ No product found with ID: " + product.getId());
 
         } catch (SQLException e) {
-            System.out.println("❌ Error updating product: " + e.getMessage());
+            System.out.println("Error updating product: " + e.getMessage());
         }
     }
 
@@ -112,7 +112,7 @@ public class ProductDAOImpl implements ProductDAO {
             return rows > 0;
 
         } catch (SQLException e) {
-            System.out.println("❌ Error deleting product: " + e.getMessage());
+            System.out.println("Error deleting product: " + e.getMessage());
             return false;
         }
     }

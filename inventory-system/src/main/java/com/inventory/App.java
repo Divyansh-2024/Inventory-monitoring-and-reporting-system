@@ -81,20 +81,23 @@ public class App {
         InventoryManager manager = new InventoryManager();
 
         while (true) {
-            System.out.println("\n================== INVENTORY MENU ================= ");
-            System.out.printf("| %-3s | %-42s |\n", "1️", "Add Product ");
-            System.out.printf("| %-3s | %-42s |\n", "2️", "Delete Product ");
+            System.out.println("\n================== INVENTORY MENU ================== ");
 
             if (currentUser.getRole().equalsIgnoreCase("admin")) {
+                System.out.printf("| %-3s | %-42s |\n", "1️", "Add Product ");
+                System.out.printf("| %-3s | %-42s |\n", "2️", "Delete Product ");
+
                 System.out.printf("| %-3s | %-42s |\n", "3️", "View All Products ");
                 System.out.printf("| %-3s | %-42s |\n", "4️", "Search Product ");
                 System.out.printf("| %-3s | %-42s |\n", "5️", "Update Product Quantity ");
                 System.out.printf("| %-3s | %-42s |\n", "6️", "Exit ");
-            } else {
-                System.out.printf("| %-3s | %-42s |\n", "3️", "Exit ");
+            } else { // role = user
+                System.out.printf("| %-3s | %-42s |\n", "1", "View All Products");
+                System.out.printf("| %-3s | %-42s |\n", "2", "Search Product");
+                System.out.printf("| %-3s | %-42s |\n", "3", "Exit");
             }
-            System.out.println("===================================================");
-            System.out.print("Choose an option (1-6): ");
+            System.out.println("====================================================");
+            System.out.print("Choose an option: ");
             int option = sc.nextInt();
             sc.nextLine();
 
@@ -115,6 +118,7 @@ public class App {
                             double price = sc.nextDouble();
                             sc.nextLine();
                             manager.addProduct(new Product(addId, addName, addCat, qty, price));
+                            System.out.println("Product added successfully!");
                             break;
 
                         case 2: // Remove
@@ -122,6 +126,7 @@ public class App {
                             int removeId = sc.nextInt();
                             sc.nextLine();
                             manager.removeProduct(removeId);
+                            System.out.println("Product removed successfully!");
                             break;
                         case 3: // View All
                             manager.displayInventory();
@@ -186,7 +191,7 @@ public class App {
                     switch (option) {
                         case 1 -> manager.displayInventory();
                         case 2 -> {
-                             System.out.println("\n============ Search Options ===========");
+                            System.out.println("\n============ Search Options ===========");
                             System.out.println("| 1. Search By ID                     |");
                             System.out.println("| 2. Search By Name                   |");
                             System.out.println("| 3. Search By Category               |");

@@ -26,7 +26,7 @@ public class UserService {
 
             User newUser = new User(0, username, password, role);
             userDAO.addUser(newUser);
-            System.out.println("Registered successfully!");
+            
             return true;
 
         } catch (SQLException e) {
@@ -39,7 +39,7 @@ public class UserService {
         try {
             User user = userDAO.getUserByUsername(username);
             if (user != null && user.getPassword().equals(password)) {
-                System.out.println("Login successful! Welcome " + user.getUserName());
+                System.out.println("Congratulations, Login successful! ");
                 return user;
             } else {
                 System.out.println("Invalid username or password!");
