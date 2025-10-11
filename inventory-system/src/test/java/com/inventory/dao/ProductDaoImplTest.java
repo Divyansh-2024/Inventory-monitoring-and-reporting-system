@@ -1,5 +1,4 @@
 package com.inventory.dao;
-
 import com.inventory.dao.impl.ProductDAOImpl;
 import com.inventory.model.Product;
 import org.junit.jupiter.api.*;
