@@ -254,12 +254,12 @@ public class App {
                             EmailUtil.sendReport(
                                     "admin@company.com",
                                     "User Inventory Report",
-                                    "📩 Attached is your requested inventory report.",
+                                    "Attached is your requested inventory report.",
                                     filePath);
-                            System.out.println("✅ Report generated and emailed successfully!");
+                            System.out.println("Report generated and emailed successfully!");
                         }
                         case 4 -> {
-                            System.out.println("Logged out successfully!");
+                            System.out.println(" Logged out successfully!");
                             sc.close();
                             System.exit(0);
                         }
