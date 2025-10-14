@@ -26,7 +26,7 @@ public class ProductDAOImpl implements ProductDAO {
         
 
         } catch (SQLException e) {
-            System.out.println("Error adding product: " + e.getMessage());
+            System.out.println(" ✖ Error adding product: " + e.getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ public class ProductDAOImpl implements ProductDAO {
                         rs.getDouble("price")));
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching products: " + e.getMessage());
+            System.out.println(" ✖ Error fetching products: " + e.getMessage());
         }
         return products;
     }
@@ -71,7 +71,7 @@ public class ProductDAOImpl implements ProductDAO {
                         rs.getDouble("price"));
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching product: " + e.getMessage());
+            System.out.println(" ✖ Error fetching product: " + e.getMessage());
         }
         return null;
     }
@@ -96,7 +96,7 @@ public class ProductDAOImpl implements ProductDAO {
                 System.out.println("⚠️ No product found with ID: " + product.getId());
 
         } catch (SQLException e) {
-            System.out.println("Error updating product: " + e.getMessage());
+            System.out.println(" ✖ Error updating product: " + e.getMessage());
         }
     }
 

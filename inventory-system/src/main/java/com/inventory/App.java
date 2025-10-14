@@ -4,8 +4,11 @@ import com.inventory.model.Product;
 import com.inventory.model.User;
 import com.inventory.services.InventoryManager;
 import com.inventory.services.UserService;
+import com.inventory.utility.CSVHelper;
+import com.inventory.utility.EmailUtil;
 import com.inventory.exceptions.*;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
@@ -81,22 +84,24 @@ public class App {
         InventoryManager manager = new InventoryManager();
 
         while (true) {
-            System.out.println("\n================== INVENTORY MENU ================== ");
+            System.out.println("\n================== INVENTORY MENU ================= ");
 
             if (currentUser.getRole().equalsIgnoreCase("admin")) {
                 System.out.printf("| %-3s | %-42s |\n", "1️", "Add Product ");
                 System.out.printf("| %-3s | %-42s |\n", "2️", "Delete Product ");
-
                 System.out.printf("| %-3s | %-42s |\n", "3️", "View All Products ");
                 System.out.printf("| %-3s | %-42s |\n", "4️", "Search Product ");
                 System.out.printf("| %-3s | %-42s |\n", "5️", "Update Product Quantity ");
-                System.out.printf("| %-3s | %-42s |\n", "6️", "Exit ");
+                System.out.printf("| %-2s | %-42s |\n", "6", "Generate Product Report ");
+                System.out.printf("| %-2s | %-42s |\n", "7", "Exit ");
             } else { // role = user
                 System.out.printf("| %-3s | %-42s |\n", "1", "View All Products");
                 System.out.printf("| %-3s | %-42s |\n", "2", "Search Product");
-                System.out.printf("| %-3s | %-42s |\n", "3", "Exit");
+                System.out.printf("| %-3s | %-42s |\n", "3", "Generate Product Report");
+
+                System.out.printf("| %-3s | %-42s |\n", "4", "Exit");
             }
-            System.out.println("====================================================");
+            System.out.println("===================================================");
             System.out.print("Choose an option: ");
             int option = sc.nextInt();
             sc.nextLine();
@@ -179,7 +184,20 @@ public class App {
                             manager.updateProductQty(pid, newQty);
                             break;
 
-                        case 6: // Exit
+                        case 6: // Report generation
+                            System.out.println("\n Generating inventory report...");
+                            List<Product> products = manager.getAllProducts();
+
+                            String filePath = CSVHelper.writeProductsCSV(products, "Admin");
+                            EmailUtil.sendReport(
+                                    "admin@company.com",
+                                    "Daily Inventory Report",
+                                    "📩 Attached is your latest inventory report.",
+                                    filePath);
+                            System.out.println("✅ Report generated and emailed successfully!");
+                            break;
+
+                        case 7: // Exit
                             System.out.println("Logged out successfully!");
                             sc.close();
                             System.exit(0);
@@ -229,6 +247,18 @@ public class App {
                             }
                         }
                         case 3 -> {
+                            System.out.println("\n🕒 Generating inventory report...");
+                            List<Product> products = manager.getAllProducts();
+
+                            String filePath = CSVHelper.writeProductsCSV(products, currentUser.getUserName());
+                            EmailUtil.sendReport(
+                                    "admin@company.com",
+                                    "User Inventory Report",
+                                    "📩 Attached is your requested inventory report.",
+                                    filePath);
+                            System.out.println("✅ Report generated and emailed successfully!");
+                        }
+                        case 4 -> {
                             System.out.println("Logged out successfully!");
                             sc.close();
                             System.exit(0);
@@ -239,7 +269,7 @@ public class App {
             } catch (DuplicateProductException | InvalidProductDataException | ProductNotFoundException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
-                System.out.println("Unexpected error: " + e.getMessage());
+                System.out.println(" ✖ Unexpected error: " + e.getMessage());
             }
         }
     }

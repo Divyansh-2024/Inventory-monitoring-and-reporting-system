@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class InventoryManager {
 
-    private ProductDAO productDAO;
+    private final ProductDAO productDAO;
 
     public InventoryManager() {
         productDAO = new ProductDAOImpl();
@@ -22,7 +22,7 @@ public class InventoryManager {
     // Add product
     public void addProduct(Product product) throws DuplicateProductException, InvalidProductDataException {
         if (product == null || product.getId() <= 0 || product.getName() == null || product.getName().isEmpty()) {
-            throw new InvalidProductDataException("Invalid product data provided!");
+            throw new InvalidProductDataException("⚠️ Invalid product data provided!");
         }
 
         try {
@@ -33,6 +33,7 @@ public class InventoryManager {
                 }
             }
             productDAO.addProduct(product);
+            System.out.println("Product added successfully!");
         } catch (SQLException e) {
             System.out.println("Database error while adding product: " + e.getMessage());
         }
@@ -59,7 +60,7 @@ public class InventoryManager {
                 if (p.getId() == id) {
                     p.setQuantity(qty);
                     productDAO.updateProduct(p);
-                    System.out.println("Quantity updated successfully for product ID " + id);
+                    System.out.println("✅ Quantity updated successfully for product ID " + id);
                     return;
                 }
             }
@@ -69,7 +70,7 @@ public class InventoryManager {
         }
     }
 
-    // Search product by name
+    // Search by name
     public Product searchProduct(String name) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -86,12 +87,12 @@ public class InventoryManager {
         }
     }
 
-    // Display all products
+    // Display all
     public void displayInventory() {
         try {
             List<Product> products = productDAO.getAllProducts();
             if (products.isEmpty()) {
-                System.out.println("Inventory is empty.");
+                System.out.println("⚠️ Inventory is empty.");
             } else {
                 printProductTable(products);
             }
@@ -100,17 +101,15 @@ public class InventoryManager {
         }
     }
 
-    // Search product by ID
+    // Search by ID
     public Product searchProductById(int id) throws ProductNotFoundException {
         try {
-            List<Product> products = productDAO.getAllProducts();
-            for (Product p : products) {
-                if (p.getId() == id) {
-                    printProductTable(List.of(p));
-                    return p;
-                }
+            Product product = productDAO.getProductById(id);
+            if (product == null) {
+                throw new ProductNotFoundException("Product not found with ID: " + id);
             }
-            throw new ProductNotFoundException("Product not found with ID: " + id);
+            printProductTable(List.of(product));
+            return product;
         } catch (SQLException e) {
             System.out.println("Database error while searching product by ID: " + e.getMessage());
             return null;
@@ -139,7 +138,7 @@ public class InventoryManager {
         }
     }
 
-    // Print products in table format
+    // Print table
     public void printProductTable(List<Product> products) {
         if (products.isEmpty()) {
             System.out.println("No products to display!");
@@ -160,25 +159,34 @@ public class InventoryManager {
         System.out.println("└──────┴──────────────────────────────┴───────────────────────┴───────────┴───────────┘");
     }
 
-    // Search products by price range
+    // Search by price range
     public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws ProductNotFoundException {
-    try {
-        List<Product> filteredProducts = productDAO.getProductsByPriceRange(minPrice, maxPrice);
+        try {
+            List<Product> filteredProducts = productDAO.getProductsByPriceRange(minPrice, maxPrice);
 
-        if (filteredProducts.isEmpty()) {
-            throw new ProductNotFoundException("No products found in the price range: " + minPrice + " - " + maxPrice);
-        } else {
-            System.out.println("\nProducts in price range " + minPrice + " - " + maxPrice + ":");
-            printProductTable(filteredProducts);
+            if (filteredProducts.isEmpty()) {
+                throw new ProductNotFoundException(
+                        "No products found in the price range: " + minPrice + " - " + maxPrice);
+            } else {
+                System.out.println("\nProducts in price range " + minPrice + " - " + maxPrice + ":");
+                printProductTable(filteredProducts);
+            }
+
+            return filteredProducts;
+
+        } catch (SQLException e) {
+            System.out.println("Database error while fetching products by price range: " + e.getMessage());
+            return new ArrayList<>();
         }
-
-        return filteredProducts;
-
-    } catch (SQLException e) {
-        System.out.println("Database error while fetching products by price range: " + e.getMessage());
-        return new ArrayList<>();
     }
-}
 
-
+    //csv report
+    public List<Product> getAllProducts() {
+        try {
+            return productDAO.getAllProducts();
+        } catch (SQLException e) {
+            System.out.println("Database error while getting all products: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 }
