@@ -1,63 +1,64 @@
-
 package com.inventory.services;
 
-import jakarta.mail.Multipart;
-import jakarta.mail.internet.MimeBodyPart;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.*;
+import jakarta.mail.internet.*;
 import java.io.File;
 import java.util.Properties;
 
 public class EmailService {
+
     public static void sendReport(String toEmail, String subject, String body, String attachmentPath) {
 
-        final String fromEmail = System.getenv("MAIL_USER"); // your email
-
-        final String password = System.getenv("MAIL_PASS"); // your app password
+        final String fromEmail = System.getenv("MY_EMAIL");  // email address
+        final String password = System.getenv("APP_PASSWORD");  // App password
 
         if (fromEmail == null || password == null) {
-
-            throw new RuntimeException("X Email credentials not set in environment variables!");
+            throw new RuntimeException("Email credentials not set in environment variables!");
         }
 
-        // SMTP configuration
-    Properties props = new Properties();
-    props.put("mail.smtp.host","smtp.gmail.com");
-    props.put("mail.smtp.port","587");
-    props.put("mail.smtp.auth","true");
-    props.put("mail.smtp.starttls.enable","true");
+        // Gmail SMTP configuration
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
 
-    Session session = Session.getInstance(props, new Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication (from Email, password); }
+        // session creation
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, password);
+            }
         });
 
-    try {
-        Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(toEmail));
-        message.setSubject(subject);
+        try {
+            // Compose message
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(fromEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(subject);
 
-        // Email body
-        MimeBodyPart textPart = new MimeBodyPart();textPart.setText(body);
+            // Body part
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setText(body);
 
-        // Attachment part
-        MimeBodyPart attachmentPart = new MimeBodyPart();
-        attachmentPart.attachFile(new File(attachmentPath));
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(textPart);
-        multipart.addBodyPart(attachmentPart);
+            // Attachment part
+            MimeBodyPart attachmentPart = new MimeBodyPart();
+            attachmentPart.attachFile(new File(attachmentPath));
 
-        message.setContent(multipart);
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(textPart);
+            multipart.addBodyPart(attachmentPart);
 
-        Transport.send(message);
+            message.setContent(multipart);
 
-        System.out.println("✓ Report sent successfully to "+toEmail);
+            // Sending mail
+            Transport.send(message);
+
+            System.out.println("Report sent successfully to " + toEmail);
+
+        } catch (Exception e) {
+            System.out.println("Error sending email: " + e.getMessage());
+        }
     }
-    catch(Exception e){
-        System.out.println("X Error sending email: " + e.getMessage());
-    }
-    }
-
-    
 }

@@ -1,11 +1,11 @@
 package com.inventory;
 
+import com.inventory.services.EmailService;
 import com.inventory.model.Product;
 import com.inventory.model.User;
 import com.inventory.services.InventoryManager;
 import com.inventory.services.UserService;
 import com.inventory.utility.CSVHelper;
-import com.inventory.utility.EmailUtil;
 import com.inventory.exceptions.*;
 
 import java.util.List;
@@ -189,12 +189,11 @@ public class App {
                             List<Product> products = manager.getAllProducts();
 
                             String filePath = CSVHelper.writeProductsCSV(products, "Admin");
-                            EmailUtil.sendReport(
-                                    "admin@company.com",
+                            EmailService.sendReport(
+                                    System.getenv("MY_EMAIL"),
                                     "Daily Inventory Report",
-                                    "📩 Attached is your latest inventory report.",
+                                    "Attached is your latest inventory report.",
                                     filePath);
-                            System.out.println("✅ Report generated and emailed successfully!");
                             break;
 
                         case 7: // Exit
@@ -247,16 +246,16 @@ public class App {
                             }
                         }
                         case 3 -> {
-                            System.out.println("\n🕒 Generating inventory report...");
+                           System.out.println("\n Generating inventory report...");
                             List<Product> products = manager.getAllProducts();
 
-                            String filePath = CSVHelper.writeProductsCSV(products, currentUser.getUserName());
-                            EmailUtil.sendReport(
-                                    "admin@company.com",
-                                    "User Inventory Report",
-                                    "Attached is your requested inventory report.",
+                            String filePath = CSVHelper.writeProductsCSV(products, "Admin");
+                            EmailService.sendReport(
+                                    System.getenv("MY_EMAIL"),
+                                    "Daily Inventory Report",
+                                    "Attached is your latest inventory report.",
                                     filePath);
-                            System.out.println("Report generated and emailed successfully!");
+                            break;
                         }
                         case 4 -> {
                             System.out.println(" Logged out successfully!");
