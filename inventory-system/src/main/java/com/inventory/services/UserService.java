@@ -39,11 +39,8 @@ public class UserService {
         try {
             User user = userDAO.getUserByUsername(username);
             if (user != null && user.getPassword().equals(password)) {
-                System.out.println("Congratulations, Login successful! ");
                 return user;
-            } else {
-                System.out.println("Invalid username or password!");
-            }
+            } 
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
         }
