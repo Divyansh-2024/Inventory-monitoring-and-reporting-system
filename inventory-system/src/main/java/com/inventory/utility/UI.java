@@ -51,6 +51,7 @@ public class UI {
         System.out.println(GREEN + "║ 6. ║ Generate Report              ║" + RESET);
         System.out.println(GREEN + "║ 7. ║ Logout                       ║" + RESET);
         System.out.println(GREEN + "╚════╚══════════════════════════════╝" + RESET);
+        System.out.print( YELLOW + "Choose a option (1-7): ");
     } else {
         System.out.println(GREEN + "╔════╔══════════════════════════════╗" + RESET);
         System.out.println(GREEN + "║ 1. ║ View All Products            ║" + RESET);
@@ -58,8 +59,9 @@ public class UI {
         System.out.println(GREEN + "║ 3. ║ Generate Report              ║" + RESET);
         System.out.println(GREEN + "║ 4. ║ Logout                       ║" + RESET);
         System.out.println(GREEN + "╚════╚══════════════════════════════╝" + RESET);
+        System.out.print( YELLOW + "Choose a option (1-4): ");
     }
-    System.out.print( YELLOW + "Choose a option (1-7): ");
+    
 }
 
 
@@ -115,6 +117,6 @@ public class UI {
     }
 
     public static void printInfo(String message) {
-        System.out.println(CYAN + "ℹ️ INFO: " + message + RESET);
+        System.out.println(CYAN + " INFO: " + message);
     }
 }
