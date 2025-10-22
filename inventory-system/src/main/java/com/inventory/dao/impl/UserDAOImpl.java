@@ -10,16 +10,17 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void addUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (name, password, role, email ,is_verified) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getUserName());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getRole());
+            ps.setString(4, user.getEmail());
+            ps.setBoolean(5, user.is_verified());
             ps.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
-            // Handle duplicate username case (test expects no exception)
             System.err.println("Duplicate username: " + e.getMessage());
         }
     }
@@ -29,18 +30,52 @@ public class UserDAOImpl implements UserDAO {
         String sql = "SELECT * FROM users WHERE name = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new User(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("password"),
-                    rs.getString("role")
-                );
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("password"),
+                        rs.getString("role"),
+                        rs.getString("email"),
+                        rs.getBoolean("is_verified"));
             }
         }
         return null;
     }
+
+    public User getUserByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (
+                Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("password"),
+                        rs.getString("role"),
+                        rs.getString("email"),
+                        rs.getBoolean("is_verified"));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void verifyUser(String email) throws SQLException {
+        String sql = "UPDATE users SET is_verified =TRUE WHERE email=?";
+        try (
+                Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, email);
+                ps.executeUpdate();
+        }
+    }
+
 }

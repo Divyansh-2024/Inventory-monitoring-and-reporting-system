@@ -1,12 +1,9 @@
 package com.inventory;
 
-import com.inventory.services.EmailService;
 import com.inventory.model.Product;
 import com.inventory.model.User;
-import com.inventory.services.InventoryManager;
-import com.inventory.services.UserService;
+import com.inventory.services.*;
 import com.inventory.utility.CSVHelper;
-import com.inventory.utility.UI;
 import com.inventory.exceptions.*;
 
 import java.sql.SQLException;
@@ -15,219 +12,400 @@ import java.util.Scanner;
 
 public class App {
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        UserService userService = new UserService();
-        User currentUser = null;
+    private static final Scanner sc = new Scanner(System.in);
+    private static UserService userService;
+    private static final InventoryManager manager = new InventoryManager();
+    private static final OTPService otpService = new OTPService();
 
-        UI.printHeader();
 
-        // ===== LOGIN / REGISTER MENU =====
-        // ===== LOGIN / REGISTER MENU =====
-while (true) {
-    UI.printLoginMenu();
-    int choice = sc.nextInt();
-    sc.nextLine();
+    // ===== ANSI Colors =====
+    private static final String RESET = "\u001B[0m";
+    private static final String RED = "\u001B[31m";
+    private static final String GREEN = "\u001B[32m";
+    private static final String YELLOW = "\u001B[33m";
+    private static final String BLUE = "\u001B[34m";
+    private static final String PURPLE = "\u001B[35m";
+    private static final String CYAN = "\u001B[36m";
+    private static final String BOLD = "\u001B[1m";
 
-    switch (choice) {
-        case 1: // Login
-            System.out.print("Username: ");
-            String username = sc.nextLine();
-            System.out.print("Password: ");
-            String password = sc.nextLine();
-            try {
-                currentUser = userService.login(username, password);
+    public static void main(String[] args) throws SQLException {
+        userService = new UserService(); // initialize here to handle SQLException
 
-                // Only print success if login actually returns a user
-                if (currentUser != null) {
-                    UI.printSuccess("Login successful! Welcome, " + currentUser.getUserName() + "(" + currentUser.getRole() + ")" );
-                    break; // exit login loop
-                } else {
-                    UI.printError("Invalid username or password!");
-                }
+        printHeader();
+        User currentUser = handleLoginOrRegister();
 
-            } catch (Exception e) {
-                // Catch any unexpected exception
-                UI.printError("Login failed: " + e.getMessage());
-            }
-            continue;
+        if (currentUser == null) {
+            printError("Exiting... could not login or register.");
+            return;
+        }
 
-        case 2: // Register
-            System.out.print("Choose a username: ");
-            String newUsername = sc.nextLine();
-            System.out.print("Choose a password: ");
-            String newPassword = sc.nextLine();
-            System.out.print("Enter role (admin/user): ");
-            String role = sc.nextLine().toLowerCase();
-            try {
-                userService.register(newUsername, newPassword, role);
-                UI.printSuccess("User registered successfully! You can login now.");
-            } catch (DuplicateUserException e) {
-                UI.printError(e.getMessage());
-            }
-            continue;
-
-        case 3: // Exit
-            UI.printInfo("Exited Successfully... Bye! 👋");
-            sc.close();
-            System.exit(0);
-
-        default:
-            UI.printWarning("Invalid choice! Try again.");
+        if (currentUser.getRole().equalsIgnoreCase("admin")) {
+            handleAdminMenu(currentUser);
+        } else {
+            handleUserMenu(currentUser);
+        }
     }
 
-    if (currentUser != null) break; // exit login loop after successful login
+    // =========================================================
+    // HEADER & MENUS
+    // =========================================================
+    private static void printHeader() {
+        System.out.println(BLUE + "╔═══════════════════════════════════════════════╗" + RESET);
+        System.out.println(
+                BLUE + "║" + CYAN + BOLD + "    WELCOME TO INVENTORY MANAGEMENT SYSTEM     " + BLUE + "║" + RESET);
+        System.out.println(BLUE + "╚═══════════════════════════════════════════════╝" + RESET);
+        System.out.println();
+    }
+
+    private static void printLoginMenu() {
+        System.out.println(PURPLE + "╔════════════════════════════════╗" + RESET);
+        System.out.println(PURPLE + "║" + YELLOW + "     LOGIN / REGISTER MENU      " + PURPLE + "║" + RESET);
+        System.out.println(PURPLE + "╚════════════════════════════════╝" + RESET);
+        System.out.println(CYAN + "1. Login ");
+        System.out.println("2. Register ");
+        System.out.println("3. Verify Email ");
+        System.out.println("4. Exit " + RESET);
+        System.out.print(YELLOW + "Enter choice: " + RESET);
+    }
+
+    private static void printInventoryMenu(boolean isAdmin) {
+        System.out.println(BLUE + "\n╔═══════════════════════════════════╗" + RESET);
+        System.out.println(BLUE + "║" + CYAN + "          INVENTORY MENU           " + BLUE + "║" + RESET);
+        System.out.println(BLUE + "╚═══════════════════════════════════╝" + RESET);
+
+        if (isAdmin) {
+            System.out.println(GREEN + "╔════╔══════════════════════════════╗" + RESET);
+            System.out.println(GREEN + "║ 1. ║ Add Product                  ║" + RESET);
+            System.out.println(GREEN + "║ 2. ║ Remove Product               ║" + RESET);
+            System.out.println(GREEN + "║ 3. ║ View All Products            ║" + RESET);
+            System.out.println(GREEN + "║ 4. ║ Search Product               ║" + RESET);
+            System.out.println(GREEN + "║ 5. ║ Update Quantity              ║" + RESET);
+            System.out.println(GREEN + "║ 6. ║ Generate Report              ║" + RESET);
+            System.out.println(GREEN + "║ 7. ║ Logout                       ║" + RESET);
+            System.out.println(GREEN + "╚════╚══════════════════════════════╝" + RESET);
+            System.out.print(YELLOW + "Choose a option (1-7): " + RESET);
+        } else {
+            System.out.println(GREEN + "╔════╔══════════════════════════════╗" + RESET);
+            System.out.println(GREEN + "║ 1. ║ View All Products            ║" + RESET);
+            System.out.println(GREEN + "║ 2. ║ Search Product               ║" + RESET);
+            System.out.println(GREEN + "║ 3. ║ Generate Report              ║" + RESET);
+            System.out.println(GREEN + "║ 4. ║ Logout                       ║" + RESET);
+            System.out.println(GREEN + "╚════╚══════════════════════════════╝" + RESET);
+            System.out.print(YELLOW + "Choose a option (1-4): " + RESET);
+        }
+    }
+
+    private static void printSearchMenu() {
+        System.out.println(PURPLE + "\n╔═════════════════════════════╗" + RESET);
+        System.out.println(PURPLE + "║" + CYAN + "  PRODUCT SEARCH OPTIONS     " + PURPLE + "║" + RESET);
+        System.out.println(PURPLE + "╚═════════════════════════════╝" + RESET);
+        System.out.println(CYAN + "1. Search by ID");
+        System.out.println("2. Search by Name");
+        System.out.println("3. Search by Category");
+        System.out.println("4. Search by Price Range" + RESET);
+        System.out.print(YELLOW + " Enter your choice: " + RESET);
+    }
+
+    // =========================================================
+    // LOGIN / REGISTER / VERIFY EMAIL
+    // =========================================================
+    private static User handleLoginOrRegister() {
+        User currentUser = null;
+
+        while (true) {
+            printLoginMenu();
+            int choice = readInt();
+
+            switch (choice) {
+                case 1 -> currentUser = loginUser();
+                case 2 -> registerUser();
+                case 3 -> verifyEmailMenu();
+                case 4 -> {
+                    printInfo("Exited Successfully... Bye!");
+                    sc.close();
+                    System.exit(0);
+                }
+                default -> printWarning("Invalid choice! Try again.");
+            }
+
+            if (currentUser != null)
+                break;
+        }
+
+        return currentUser;
+    }
+
+    private static User loginUser() {
+        System.out.print("Username: ");
+        String username = sc.nextLine();
+        System.out.print("Password: ");
+        String password = sc.nextLine();
+
+        try {
+            User user = userService.login(username, password);
+            if (user != null) {
+                if (!user.is_verified()) {
+                    printWarning("Email not verified! Please verify your email first.");
+                    return null;
+                }
+                printSuccess("Login successful! Welcome, " + user.getUserName() + " (" + user.getRole() + ")");
+                return user;
+            } else {
+                printError("Invalid username or password!");
+            }
+        } catch (Exception e) {
+            printError("Login failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private static void registerUser() {
+        System.out.print("Choose a username: ");
+        String username = sc.nextLine();
+        System.out.print("Choose a password: ");
+        String password = sc.nextLine();
+        System.out.print("Enter role (admin/user): ");
+        String role = sc.nextLine().toLowerCase();
+        System.out.print("Enter email: ");
+        String email = sc.nextLine();
+
+        try {
+            boolean success = userService.register(username, password, role, email, false);
+            if (success)
+                printSuccess("User registered successfully! Please verify your email before login.");
+        } catch (DuplicateUserException e) {
+            printError("Registration error "+ e.getMessage());
+        }
+    }
+
+    private static void verifyEmailMenu() {
+    System.out.print("Enter your registered email: ");
+    String email = sc.nextLine();
+    try {
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            printError("Email not found!");
+            return;
+        }
+        if (user.is_verified()) {
+            printInfo("Email is already verified!");
+            return;
+        }
+
+        // Generate OTP (static call)
+        String otp = OTPService.generateOTP(email);
+        printInfo("OTP sent to email (simulated): " + otp); // simulation
+
+        System.out.print("Enter the OTP: ");
+        String enteredOTP = sc.nextLine();
+
+        // Validate OTP (static call)
+        if (OTPService.validateOTP(email, enteredOTP)) {
+            userService.verifyEmailWithOTP(email, enteredOTP);
+            printSuccess("Email verified successfully! You can login now.");
+        } else {
+            printError("Invalid OTP. Try again.");
+        }
+    } catch (Exception e) {
+        printError("Database error: " + e.getMessage());
+    }
 }
 
 
-        // ===== INVENTORY MENU =====
-        InventoryManager manager = new InventoryManager();
-
+    // =========================================================
+    // ADMIN / USER MENU HANDLERS
+    // =========================================================
+    private static void handleAdminMenu(User currentUser) {
         while (true) {
-            UI.printInventoryMenu(currentUser.getRole().equalsIgnoreCase("admin"));
-            int option = sc.nextInt();
-            sc.nextLine();
-
+            printInventoryMenu(true);
+            int option = readInt();
             try {
-                if (currentUser.getRole().equalsIgnoreCase("admin")) {
-                    switch (option) {
-                        case 1 -> {
-                            System.out.print(UI.CYAN + " Enter product ID: " + UI.RESET);
-                            int addId = sc.nextInt();
-                            sc.nextLine();
-                            System.out.print(UI.CYAN + " Enter name: " + UI.RESET);
-                            String addName = sc.nextLine();
-                            System.out.print(UI.CYAN + " Enter category: " + UI.RESET);
-                            String addCat = sc.nextLine();
-                            System.out.print(UI.CYAN + " Enter quantity: " + UI.RESET);
-                            int qty = sc.nextInt();
-                            System.out.print(UI.CYAN + " Enter price: " + UI.RESET);
-                            double price = sc.nextDouble();
-                            sc.nextLine();
-                            manager.addProduct(new Product(addId, addName, addCat, qty, price));
-                            UI.printSuccess("Product added successfully!");
-                        }
-                        case 2 -> {
-                            System.out.print(UI.CYAN + " Enter product ID to remove: " + UI.RESET);
-                            int removeId = sc.nextInt();
-                            sc.nextLine();
-                            manager.removeProduct(removeId);
-                            UI.printSuccess("Product removed successfully!");
-                        }
-                        case 3 -> manager.displayInventory();
-                        case 4 -> {
-                            UI.printSearchMenu();
-                            int searchChoice = sc.nextInt();
-                            sc.nextLine();
-                            handleSearch(manager, searchChoice, sc);
-                        }
-                        case 5 -> {
-                            System.out.print(UI.CYAN + " Enter product ID: " + UI.RESET);
-                            int pid = sc.nextInt();
-                            System.out.print(UI.CYAN + " Enter new quantity: " + UI.RESET);
-                            int newQty = sc.nextInt();
-                            sc.nextLine();
-                            manager.updateProductQty(pid, newQty);
-                            UI.printSuccess("Product quantity updated successfully!");
-                        }
-                        case 6 -> {
-                            UI.printInfo("Generating inventory report...");
-                            List<Product> products = manager.getAllProducts();
-                            String filePath = CSVHelper.writeProductsCSV(products, "Admin");
-                            EmailService.sendReport(
-                                    System.getenv("MY_EMAIL"),
-                                    "Daily Inventory Report",
-                                    "Attached is your latest inventory report.",
-                                    filePath);
-                            UI.printSuccess("Report sent successfully! ");
-                        }
-                        case 7 -> {
-                            UI.printInfo("Logged out successfully! 👋");
-                            sc.close();
-                            System.exit(0);
-                        }
-                        default -> UI.printWarning("Invalid option! Try again.");
-                    }
-                } else {
-                    switch (option) {
-                        case 1 -> manager.displayInventory();
-                        case 2 -> {
-                            UI.printSearchMenu();
-                            int searchChoice = sc.nextInt();
-                            sc.nextLine();
-                            handleSearch(manager, searchChoice, sc);
-                        }
-                        case 3 -> {
-                            UI.printInfo("Generating inventory report...");
-                            List<Product> products = manager.getAllProducts();
-                            String filePath = CSVHelper.writeProductsCSV(products, "User");
-                            EmailService.sendReport(
-                                    System.getenv("MY_EMAIL"),
-                                    "Daily Inventory Report",
-                                    "Attached is your latest inventory report.",
-                                    filePath);
-                            UI.printSuccess("Report sent successfully! ");
-                        }
-                        case 4 -> {
-                            UI.printInfo("Logged out successfully!");
-                            sc.close();
-                            System.exit(0);
-                        }
-                        default -> UI.printWarning("Invalid option! Try again.");
-                    }
+                switch (option) {
+                    case 1 -> addProduct();
+                    case 2 -> removeProduct();
+                    case 3 -> manager.displayInventory();
+                    case 4 -> handleSearchMenu();
+                    case 5 -> updateProductQuantity();
+                    case 6 -> generateAndSendReport("Admin");
+                    case 7 -> logout();
+                    default -> printWarning("Invalid option! Try again.");
                 }
             } catch (DuplicateProductException | InvalidProductDataException | ProductNotFoundException e) {
-                UI.printError(e.getMessage());
+                printError(e.getMessage());
             } catch (Exception e) {
-                UI.printError("Unexpected error: " + e.getMessage());
+                printError("Unexpected error: " + e.getMessage());
             }
         }
     }
 
-    // ===== SEARCH HELPER =====
-    private static void handleSearch(InventoryManager manager, int searchChoice, Scanner sc) throws SQLException {
-        switch (searchChoice) {
-            case 1 -> {
-                System.out.print(UI.CYAN + " Enter product ID: " + UI.RESET);
-                int id = sc.nextInt();
-                sc.nextLine();
-                try {
-                    manager.searchProductById(id);
-                } catch (ProductNotFoundException e) {
-                    UI.printError(e.getMessage());
+    private static void handleUserMenu(User currentUser) {
+        while (true) {
+            printInventoryMenu(false);
+            int option = readInt();
+            try {
+                switch (option) {
+                    case 1 -> manager.displayInventory();
+                    case 2 -> handleSearchMenu();
+                    case 3 -> generateAndSendReport("User");
+                    case 4 -> logout();
+                    default -> printWarning("Invalid option! Try again.");
                 }
+            } catch (ProductNotFoundException e) {
+                printError(e.getMessage());
+            } catch (Exception e) {
+                printError("Unexpected error: " + e.getMessage());
             }
-            case 2 -> {
-                System.out.print(UI.CYAN + " Enter product name: " + UI.RESET);
-                String name = sc.nextLine();
-                try {
-                    manager.searchProduct(name);
-                } catch (ProductNotFoundException e) {
-                    UI.printError(e.getMessage());
-                }
-            }
-            case 3 -> {
-                System.out.print(UI.CYAN + " Enter category: " + UI.RESET);
-                String cat = sc.nextLine();
-                try {
-                    manager.searchProductByCategory(cat);
-                } catch (ProductNotFoundException e) {
-                    UI.printError(e.getMessage());
-                }
-            }
-            case 4 -> {
-                System.out.print(UI.CYAN + " Enter min price: " + UI.RESET);
-                double min = sc.nextDouble();
-                System.out.print(UI.CYAN + " Enter max price: " + UI.RESET);
-                double max = sc.nextDouble();
-                sc.nextLine();
-                try {
-                    manager.getProductsByPriceRange(min, max);
-                } catch (ProductNotFoundException e) {
-                    UI.printError(e.getMessage());
-                }
-            }
-            default -> UI.printWarning("Invalid search option!");
         }
+    }
+
+    // =========================================================
+    // PRODUCT HELPERS
+    // =========================================================
+    private static void addProduct() throws DuplicateProductException, InvalidProductDataException {
+        System.out.print(CYAN + " Enter product ID: " + RESET);
+        int id = readInt();
+        System.out.print(CYAN + " Enter name: " + RESET);
+        String name = sc.nextLine();
+        System.out.print(CYAN + " Enter category: " + RESET);
+        String category = sc.nextLine();
+        System.out.print(CYAN + " Enter quantity: " + RESET);
+        int quantity = readInt();
+        System.out.print(CYAN + " Enter price: " + RESET);
+        double price = readDouble();
+
+        manager.addProduct(new Product(id, name, category, quantity, price));
+        printSuccess("Product added successfully!");
+    }
+
+    private static void removeProduct() throws ProductNotFoundException {
+        System.out.print(CYAN + " Enter product ID to remove: " + RESET);
+        int id = readInt();
+        manager.removeProduct(id);
+        printSuccess("Product removed successfully!");
+    }
+
+    private static void updateProductQuantity() throws ProductNotFoundException {
+        System.out.print(CYAN + " Enter product ID: " + RESET);
+        int id = readInt();
+        System.out.print(CYAN + " Enter new quantity: " + RESET);
+        int newQty = readInt();
+        manager.updateProductQty(id, newQty);
+        printSuccess("Product quantity updated successfully!");
+    }
+
+    private static void generateAndSendReport(String role) throws Exception {
+        printInfo("Generating inventory report...");
+        List<Product> products = manager.getAllProducts();
+        String filePath = CSVHelper.writeProductsCSV(products, role);
+        EmailService.sendReport(System.getenv("MY_EMAIL"), "Inventory Report - " + role,
+                "Attached is your latest inventory report.", filePath);
+        printSuccess("Report sent successfully!");
+    }
+
+    // =========================================================
+    // SEARCH HELPERS
+    // =========================================================
+    private static void handleSearchMenu() throws SQLException {
+        printSearchMenu();
+        int choice = readInt();
+        sc.nextLine();
+
+        switch (choice) {
+            case 1 -> searchById();
+            case 2 -> searchByName();
+            case 3 -> searchByCategory();
+            case 4 -> searchByPriceRange();
+            default -> printWarning("Invalid search option!");
+        }
+    }
+
+    private static void searchById() throws SQLException {
+        System.out.print(CYAN + " Enter product ID: " + RESET);
+        int id = readInt();
+        try {
+            manager.searchProductById(id);
+        } catch (ProductNotFoundException e) {
+            printError(e.getMessage());
+        }
+    }
+
+    private static void searchByName() throws SQLException {
+        System.out.print(CYAN + " Enter product name: " + RESET);
+        String name = sc.nextLine();
+        try {
+            manager.searchProduct(name);
+        } catch (ProductNotFoundException e) {
+            printError(e.getMessage());
+        }
+    }
+
+    private static void searchByCategory() throws SQLException {
+        System.out.print(CYAN + " Enter category: " + RESET);
+        String category = sc.nextLine();
+        try {
+            manager.searchProductByCategory(category);
+        } catch (ProductNotFoundException e) {
+            printError(e.getMessage());
+        }
+    }
+
+    private static void searchByPriceRange() throws SQLException {
+        System.out.print(CYAN + " Enter min price: " + RESET);
+        double min = readDouble();
+        System.out.print(CYAN + " Enter max price: " + RESET);
+        double max = readDouble();
+        try {
+            manager.getProductsByPriceRange(min, max);
+        } catch (ProductNotFoundException e) {
+            printError(e.getMessage());
+        }
+    }
+
+    // =========================================================
+    // INPUT HELPERS
+    // =========================================================
+    private static int readInt() {
+        while (true) {
+            try {
+                return Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                printWarning("Please enter a valid number!");
+            }
+        }
+    }
+
+    private static double readDouble() {
+        while (true) {
+            try {
+                return Double.parseDouble(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                printWarning("Please enter a valid decimal value!");
+            }
+        }
+    }
+
+    private static void logout() {
+        printInfo("Logged out successfully!");
+        sc.close();
+        System.exit(0);
+    }
+
+    // =========================================================
+    // MESSAGE PRINTERS
+    // =========================================================
+    private static void printError(String message) {
+        System.out.println(RED + "ERROR: " + message + RESET);
+    }
+
+    private static void printSuccess(String message) {
+        System.out.println(GREEN + "SUCCESS: " + message + RESET);
+    }
+
+    private static void printWarning(String message) {
+        System.out.println(YELLOW + "WARNING: " + message + RESET);
+    }
+
+    private static void printInfo(String message) {
+        System.out.println(CYAN + "INFO: " + message + RESET);
     }
 }

@@ -48,7 +48,7 @@ public class UserDAOImplTest {
 
     @Test
     void testAddUser() throws Exception {
-        User user = new User(1, "ajit", "1234", "ADMIN");
+        User user = new User(1, "ajit", "1234", "ADMIN","admin@gmail.com",true);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
 
         userDAO.addUser(user);
@@ -65,7 +65,7 @@ public class UserDAOImplTest {
     @Test
     void testAddUserDuplicateUsername() throws Exception {
 
-        User user = new User(2, "existingUser", "abcd", "USER");
+        User user = new User(2, "existingUser", "abcd", "USER","admin2@gmail.com" , false);
 
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
 
