@@ -35,6 +35,5 @@ public class User {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email=email; }
     public boolean is_verified() { return is_verified; }
-    public void isVerified(boolean isVerified) {this.is_verified=is_verified; }
     
 }

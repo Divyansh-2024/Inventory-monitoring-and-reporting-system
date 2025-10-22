@@ -8,4 +8,5 @@ public interface UserDAO {
     User getUserByUsername(String username) throws SQLException;
     public void verifyUser(String email) throws SQLException;
     User getUserByEmail(String email) throws SQLException;
+    public boolean verifyEmail(String email) throws SQLException;
 }

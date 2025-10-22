@@ -15,8 +15,6 @@ public class App {
     private static final Scanner sc = new Scanner(System.in);
     private static UserService userService;
     private static final InventoryManager manager = new InventoryManager();
-    private static final OTPService otpService = new OTPService();
-
 
     // ===== ANSI Colors =====
     private static final String RESET = "\u001B[0m";
@@ -174,49 +172,66 @@ public class App {
             if (success)
                 printSuccess("User registered successfully! Please verify your email before login.");
         } catch (DuplicateUserException e) {
-            printError("Registration error "+ e.getMessage());
+            printError("Registration error " + e.getMessage());
+        }
+    }
+
+    private static void handleLoginOrRegisterLoop() {
+        while (true) {
+            User currentUser = handleLoginOrRegister();
+            if (currentUser != null) {
+                if (currentUser.getRole().equalsIgnoreCase("admin")) {
+                    handleAdminMenu(currentUser);
+                } else {
+                    handleUserMenu(currentUser);
+                }
+            }
         }
     }
 
     private static void verifyEmailMenu() {
-    System.out.print("Enter your registered email: ");
-    String email = sc.nextLine();
-    try {
-        User user = userService.getUserByEmail(email);
-        if (user == null) {
-            printError("Email not found!");
-            return;
-        }
-        if (user.is_verified()) {
-            printInfo("Email is already verified!");
-            return;
-        }
+        System.out.print("Enter your registered email: ");
+        String email = sc.nextLine();
 
-        // Generate OTP (static call)
-        String otp = OTPService.generateOTP(email);
-        printInfo("OTP sent to email (simulated): " + otp); // simulation
+        try {
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                printError("Email not found!");
+                return;
+            }
+            if (user.is_verified()) {
+                printInfo("Email is already verified!");
+                return;
+            }
 
-        System.out.print("Enter the OTP: ");
-        String enteredOTP = sc.nextLine();
+            // Generate OTP
+            String otp = OTPService.generateOTP(email);
 
-        // Validate OTP (static call)
-        if (OTPService.validateOTP(email, enteredOTP)) {
-            userService.verifyEmailWithOTP(email, enteredOTP);
-            printSuccess("Email verified successfully! You can login now.");
-        } else {
-            printError("Invalid OTP. Try again.");
+            // ✅ Send OTP to email using real mail service
+            EmailService.sendOTP(email, otp);
+            printInfo("OTP has been sent to your registered email address.");
+
+            // Ask user to enter the OTP they received
+            System.out.print("Enter the OTP received in your email: ");
+            String enteredOTP = sc.nextLine();
+
+            // Validate OTP
+            if (userService.verifyEmailWithOTP(email, enteredOTP)) {
+                printSuccess("Email verified successfully! You can login now.");
+            } else {
+                printError("⚠️ Invalid or expired OTP!");
+            }
+        } catch (Exception e) {
+            printError("Error verifying email: " + e.getMessage());
         }
-    } catch (Exception e) {
-        printError("Database error: " + e.getMessage());
     }
-}
-
 
     // =========================================================
     // ADMIN / USER MENU HANDLERS
     // =========================================================
     private static void handleAdminMenu(User currentUser) {
-        while (true) {
+        boolean running = true;
+        while (running) {
             printInventoryMenu(true);
             int option = readInt();
             try {
@@ -227,19 +242,20 @@ public class App {
                     case 4 -> handleSearchMenu();
                     case 5 -> updateProductQuantity();
                     case 6 -> generateAndSendReport("Admin");
-                    case 7 -> logout();
+                    case 7 -> running = false; // logout → exit menu loop
                     default -> printWarning("Invalid option! Try again.");
                 }
-            } catch (DuplicateProductException | InvalidProductDataException | ProductNotFoundException e) {
-                printError(e.getMessage());
             } catch (Exception e) {
                 printError("Unexpected error: " + e.getMessage());
             }
         }
+        // After exiting menu loop, go back to login/register
+        handleLoginOrRegisterLoop();
     }
 
     private static void handleUserMenu(User currentUser) {
-        while (true) {
+        boolean running = true;
+        while (running) {
             printInventoryMenu(false);
             int option = readInt();
             try {
@@ -247,15 +263,15 @@ public class App {
                     case 1 -> manager.displayInventory();
                     case 2 -> handleSearchMenu();
                     case 3 -> generateAndSendReport("User");
-                    case 4 -> logout();
+                    case 4 -> running = false; // logout → exit menu loop
                     default -> printWarning("Invalid option! Try again.");
                 }
-            } catch (ProductNotFoundException e) {
-                printError(e.getMessage());
             } catch (Exception e) {
                 printError("Unexpected error: " + e.getMessage());
             }
         }
+        // After exiting menu loop, go back to login/register
+        handleLoginOrRegisterLoop();
     }
 
     // =========================================================
@@ -382,12 +398,6 @@ public class App {
                 printWarning("Please enter a valid decimal value!");
             }
         }
-    }
-
-    private static void logout() {
-        printInfo("Logged out successfully!");
-        sc.close();
-        System.exit(0);
     }
 
     // =========================================================

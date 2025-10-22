@@ -67,14 +67,25 @@ public class UserDAOImpl implements UserDAO {
         return null;
     }
 
+    public boolean verifyEmail(String email) throws SQLException {
+        String sql = "UPDATE users SET is_verified = 1 WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            int rows = ps.executeUpdate();
+            return rows > 0; // true if update succeeded
+        }
+    }
+
     @Override
     public void verifyUser(String email) throws SQLException {
-        String sql = "UPDATE users SET is_verified =TRUE WHERE email=?";
+        String sql = "UPDATE users SET is_verified = 1 WHERE email=?";
         try (
                 Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, email);
-                ps.executeUpdate();
+            ps.setString(1, email);
+            ps.executeUpdate();
+
         }
     }
 

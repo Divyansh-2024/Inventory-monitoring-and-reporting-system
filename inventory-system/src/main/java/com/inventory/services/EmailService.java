@@ -100,9 +100,6 @@ public class EmailService {
 
             // Send message
             Transport.send(message);
-
-            System.out.println("INFO: OTP sent successfully to " + toEmail);
-
         } catch (MessagingException e) {
             System.out.println("ERROR: Failed to send OTP - " + e.getMessage());
         }

@@ -12,20 +12,16 @@ import java.sql.SQLException;
 public class UserService {
 
     private final UserDAO userDAO;
-    private final OTPService otpService;
-     private final UserDAOImpl userDao;
-
+    private final UserDAOImpl userDao;
 
     public UserService() throws SQLException {
         this.userDAO = new UserDAOImpl();
-        this.otpService = new OTPService();
         userDao = new UserDAOImpl();
     }
 
-   
-   
     // Step 1️⃣ Register User
-    public boolean register(String username, String password, String role, String email, boolean is_verified) throws DuplicateUserException {
+    public boolean register(String username, String password, String role, String email, boolean is_verified)
+            throws DuplicateUserException {
         try {
             User existing = userDAO.getUserByUsername(username);
             if (existing != null) {
@@ -56,28 +52,22 @@ public class UserService {
                 return;
             }
 
-            String otp = otpService.generateOTP(email);
-            System.out.println(" OTP sent to " + email + ": " + otp); // simulate email sending
+            String otp = OTPService.generateOTP(email);
+            EmailService.sendOTP(email, otp); // simulate email sending
+            System.out.println("OTP has been sent to your registered mail");
         } catch (SQLException e) {
             System.out.println("Error sending OTP: " + e.getMessage());
         }
     }
 
     // Step 3️ Verify OTP
-    public boolean verifyEmailWithOTP(String email, String enteredOTP) {
-        boolean verified = otpService.validateOTP(email, enteredOTP);
-        if (verified) {
-            try {
-                userDAO.verifyUser(email); // call DAO to mark verified
-                System.out.println("Email verified successfully! You can now log in.");
-                return true;
-            } catch (SQLException e) {
-                System.out.println("Failed to update verification status: " + e.getMessage());
-            }
-        } else {
-            System.out.println("⚠️ Invalid or expired OTP!");
+    public boolean verifyEmailWithOTP(String email, String enteredOTP) throws SQLException {
+        // Validate OTP first
+        if (OTPService.validateOTP(email, enteredOTP)) {
+            // OTP correct → update DB
+            return userDAO.verifyEmail(email); // call DAO method
         }
-        return false;
+        return false; // invalid OTP
     }
 
     // Step 4️ Login
