@@ -11,12 +11,16 @@ import java.sql.SQLException;
 
 public class UserService {
 
-    private final UserDAO userDAO;
-    private final UserDAOImpl userDao;
+     private final UserDAO userDAO;
 
+    // default constructor for production
     public UserService() throws SQLException {
         this.userDAO = new UserDAOImpl();
-        userDao = new UserDAOImpl();
+    }
+
+    // constructor for unit testing (dependency injection)
+    public UserService(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
     // Step 1️⃣ Register User
@@ -78,8 +82,6 @@ public class UserService {
                 throw new InvalidCredentialsException(" User not found!");
             }
             if (user.getPassword().equals(password)) {
-                System.out.println("Login successful! welcome, " + user.getUserName());
-                System.out.println("Role: " + user.getRole());
                 return user;
             } else {
                 System.out.println("Invalid credentials");
@@ -87,13 +89,13 @@ public class UserService {
             }
 
         } catch (SQLException e) {
-            System.out.println(" Database error during login: " + e.getMessage());
+            System.out.println("Database error during login: " + e.getMessage());
             return null;
         }
     }
 
     public User getUserByEmail(String email) throws SQLException {
-        return userDao.getUserByEmail(email);
+        return userDAO.getUserByEmail(email);
     }
 
 }

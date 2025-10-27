@@ -9,6 +9,9 @@ import com.inventory.exceptions.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class App {
 
@@ -27,6 +30,12 @@ public class App {
     private static final String BOLD = "\u001B[1m";
 
     public static void main(String[] args) throws SQLException {
+        StockAlertService alertService = new StockAlertService();
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 1, TimeUnit.MINUTES);
+        System.out.println("Stock alert scheduler started...");
+
         userService = new UserService(); // initialize here to handle SQLException
 
         printHeader();
@@ -94,13 +103,15 @@ public class App {
     }
 
     private static void printSearchMenu() {
-        System.out.println(PURPLE + "\n╔═════════════════════════════╗" + RESET);
-        System.out.println(PURPLE + "║" + CYAN + "  PRODUCT SEARCH OPTIONS     " + PURPLE + "║" + RESET);
-        System.out.println(PURPLE + "╚═════════════════════════════╝" + RESET);
-        System.out.println(CYAN + "1. Search by ID");
-        System.out.println("2. Search by Name");
-        System.out.println("3. Search by Category");
-        System.out.println("4. Search by Price Range" + RESET);
+        System.out.println(PURPLE + "\n╔═══════════════════════════════════╗" + RESET);
+        System.out.println(PURPLE + "║" + CYAN + "     PRODUCT SEARCH OPTIONS        " + PURPLE + "║" + RESET);
+        System.out.println(PURPLE + "╚═══════════════════════════════════╝" + RESET);
+        System.out.println(CYAN +"╔════╔══════════════════════════════╗");
+        System.out.println(CYAN +"║ 1. ║ Search by ID                 ║");
+        System.out.println(CYAN +"║ 2. ║ Search by Name               ║");
+        System.out.println(CYAN +"║ 3. ║ Search by Category           ║");
+        System.out.println(CYAN +"║ 4. ║ Search by Price Range        ║" + RESET);
+        System.out.println(CYAN +"╚════╚══════════════════════════════╝");
         System.out.print(YELLOW + " Enter your choice: " + RESET);
     }
 
@@ -146,7 +157,8 @@ public class App {
                     printWarning("Email not verified! Please verify your email first.");
                     return null;
                 }
-                printSuccess("Login successful! Welcome, " + user.getUserName() + " (" + user.getRole() + ")");
+                printSuccess(BOLD + "Login successful! Welcome, " + user.getUserName());
+                System.out.println(BOLD + "Role: " + user.getRole().toUpperCase());
                 return user;
             } else {
                 printError("Invalid username or password!");
@@ -190,6 +202,7 @@ public class App {
     }
 
     private static void verifyEmailMenu() {
+        System.out.println("==========Email Verification==========");
         System.out.print("Enter your registered email: ");
         String email = sc.nextLine();
 
@@ -212,11 +225,14 @@ public class App {
             printInfo("OTP has been sent to your registered email address.");
 
             // Ask user to enter the OTP they received
-            System.out.print("Enter the OTP received in your email: ");
+            System.out.print("Enter the OTP ( or type 'exit' to cancel ): ");
             String enteredOTP = sc.nextLine();
 
             // Validate OTP
-            if (userService.verifyEmailWithOTP(email, enteredOTP)) {
+            if (enteredOTP.equalsIgnoreCase("exit")) {
+                System.out.println("Returning to main menu ...");
+                return;
+            } else if (userService.verifyEmailWithOTP(email, enteredOTP)) {
                 printSuccess("Email verified successfully! You can login now.");
             } else {
                 printError("⚠️ Invalid or expired OTP!");
@@ -230,6 +246,12 @@ public class App {
     // ADMIN / USER MENU HANDLERS
     // =========================================================
     private static void handleAdminMenu(User currentUser) {
+        // new Thread(()->{
+        //     StockAlertService alertService=new StockAlertService();
+        //     ScheduledExecutorService scheduler=Executors.newScheduledThreadPool(1);
+
+        //     scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 5, TimeUnit.MINUTES);
+        // }).start();
         boolean running = true;
         while (running) {
             printInventoryMenu(true);
@@ -242,14 +264,17 @@ public class App {
                     case 4 -> handleSearchMenu();
                     case 5 -> updateProductQuantity();
                     case 6 -> generateAndSendReport("Admin");
-                    case 7 -> running = false; // logout → exit menu loop
+                    case 7 -> {
+                        printInfo("Logging out and stopping stock alert monitoring...");
+                        running = false;
+                        
+                    }
                     default -> printWarning("Invalid option! Try again.");
                 }
             } catch (Exception e) {
                 printError("Unexpected error: " + e.getMessage());
             }
-        }
-        // After exiting menu loop, go back to login/register
+        } 
         handleLoginOrRegisterLoop();
     }
 
@@ -270,9 +295,10 @@ public class App {
                 printError("Unexpected error: " + e.getMessage());
             }
         }
-        // After exiting menu loop, go back to login/register
+        
         handleLoginOrRegisterLoop();
     }
+
 
     // =========================================================
     // PRODUCT HELPERS
@@ -288,25 +314,27 @@ public class App {
         int quantity = readInt();
         System.out.print(CYAN + " Enter price: " + RESET);
         double price = readDouble();
+        System.out.print(CYAN + " Enter threshold: " + RESET);
+        int threshold = readInt();
 
-        manager.addProduct(new Product(id, name, category, quantity, price));
-        printSuccess("Product added successfully!");
+        manager.addProduct(new Product(id, name, category, quantity, price, threshold));
+        printSuccess(BOLD + "Product added successfully!");
     }
 
     private static void removeProduct() throws ProductNotFoundException {
-        System.out.print(CYAN + " Enter product ID to remove: " + RESET);
+        System.out.print(CYAN + "Enter product ID to remove: " + RESET);
         int id = readInt();
         manager.removeProduct(id);
-        printSuccess("Product removed successfully!");
+        printSuccess(BOLD + "Product removed successfully!");
     }
 
     private static void updateProductQuantity() throws ProductNotFoundException {
-        System.out.print(CYAN + " Enter product ID: " + RESET);
+        System.out.print(CYAN + "Enter product ID: " + RESET);
         int id = readInt();
-        System.out.print(CYAN + " Enter new quantity: " + RESET);
+        System.out.print(CYAN + "Enter new quantity: " + RESET);
         int newQty = readInt();
         manager.updateProductQty(id, newQty);
-        printSuccess("Product quantity updated successfully!");
+        printSuccess(BOLD + "Product quantity updated successfully for product ID "+id);
     }
 
     private static void generateAndSendReport(String role) throws Exception {
@@ -336,7 +364,7 @@ public class App {
     }
 
     private static void searchById() throws SQLException {
-        System.out.print(CYAN + " Enter product ID: " + RESET);
+        System.out.print(CYAN + "Enter product ID: " + RESET);
         int id = readInt();
         try {
             manager.searchProductById(id);
@@ -346,7 +374,7 @@ public class App {
     }
 
     private static void searchByName() throws SQLException {
-        System.out.print(CYAN + " Enter product name: " + RESET);
+        System.out.print(CYAN + "Enter product name: " + RESET);
         String name = sc.nextLine();
         try {
             manager.searchProduct(name);
@@ -356,7 +384,7 @@ public class App {
     }
 
     private static void searchByCategory() throws SQLException {
-        System.out.print(CYAN + " Enter category: " + RESET);
+        System.out.print(CYAN + "Enter category: " + RESET);
         String category = sc.nextLine();
         try {
             manager.searchProductByCategory(category);
@@ -366,9 +394,9 @@ public class App {
     }
 
     private static void searchByPriceRange() throws SQLException {
-        System.out.print(CYAN + " Enter min price: " + RESET);
+        System.out.print(CYAN + "Enter min price: " + RESET);
         double min = readDouble();
-        System.out.print(CYAN + " Enter max price: " + RESET);
+        System.out.print(CYAN + "Enter max price: " + RESET);
         double max = readDouble();
         try {
             manager.getProductsByPriceRange(min, max);

@@ -27,12 +27,13 @@ public class CSVHelper {
                 writer.println("Report Generated On: " +
                         new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
                 writer.println("===================================================");
-                writer.println("ID,NAME,CATEGORY,QUANTITY,PRICE");
+                writer.println();
+                writer.println("ID,NAME,CATEGORY,QUANTITY,PRICE,THRESHOLD");
 
                 if (products != null && !products.isEmpty()) {
                     for (Product p : products) {
                         writer.println(p.getId() + "," + p.getName() + "," + p.getCategory() + "," +
-                                p.getQuantity() + "," + p.getPrice());
+                                p.getQuantity() + "," + p.getPrice() + "," + p.getThreshold());
                     }
                 } else {
                     writer.println("⚠️ No Products Available");

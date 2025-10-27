@@ -24,7 +24,7 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Add product successfully")
     void testAddProductSuccess() {
-        Product p = new Product(1, "Laptop", "Electronics", 10, 999.99);
+        Product p = new Product(1, "Laptop", "Electronics", 10, 999.99, 10); // threshold=10
         assertDoesNotThrow(() -> manager.addProduct(p));
 
         assertDoesNotThrow(() -> {
@@ -33,23 +33,24 @@ class InventoryManagerTest {
             assertEquals("Electronics", found.getCategory());
             assertEquals(10, found.getQuantity());
             assertEquals(999.99, found.getPrice());
+            assertEquals(10, found.getThreshold());
         });
     }
 
     @Test
     @DisplayName("Add duplicate product should throw DuplicateProductException")
     void testAddDuplicateProduct() throws DuplicateProductException, InvalidProductDataException {
-        Product p1 = new Product(2, "Phone", "Electronics", 5, 499.99);
+        Product p1 = new Product(2, "Phone", "Electronics", 5, 499.99, 10);
         manager.addProduct(p1);
 
-        Product duplicate = new Product(2, "Phone X", "Electronics", 3, 699.99);
+        Product duplicate = new Product(2, "Phone X", "Electronics", 3, 699.99, 10);
         assertThrows(DuplicateProductException.class, () -> manager.addProduct(duplicate));
     }
 
     @Test
     @DisplayName("Add invalid product should throw InvalidProductDataException")
     void testAddInvalidProduct() {
-        Product invalid = new Product(0, "", "Electronics", 5, 499.99);
+        Product invalid = new Product(0, "", "Electronics", 5, 499.99, 10);
         assertThrows(InvalidProductDataException.class, () -> manager.addProduct(invalid));
     }
 
@@ -58,7 +59,7 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Remove product successfully")
     void testRemoveProductSuccess() throws DuplicateProductException, InvalidProductDataException, ProductNotFoundException {
-        Product p = new Product(3, "Book", "Books", 20, 19.99);
+        Product p = new Product(3, "Book", "Books", 20, 19.99, 10);
         manager.addProduct(p);
 
         assertDoesNotThrow(() -> manager.removeProduct(3));
@@ -76,7 +77,7 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Update product quantity successfully")
     void testUpdateQuantitySuccess() throws DuplicateProductException, InvalidProductDataException, ProductNotFoundException {
-        Product p = new Product(4, "Toy Car", "Toys", 15, 9.99);
+        Product p = new Product(4, "Toy Car", "Toys", 15, 9.99, 10);
         manager.addProduct(p);
 
         manager.updateProductQty(4, 25);
@@ -95,11 +96,12 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Search product by ID successfully")
     void testSearchById() throws DuplicateProductException, InvalidProductDataException, ProductNotFoundException {
-        Product p = new Product(5, "Banana", "Grocery", 50, 0.99);
+        Product p = new Product(5, "Banana", "Grocery", 50, 0.99, 10);
         manager.addProduct(p);
 
         Product found = manager.searchProductById(5);
         assertEquals("Banana", found.getName());
+        assertEquals(10, found.getThreshold());
     }
 
     @Test
@@ -111,11 +113,12 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Search product by name successfully")
     void testSearchByName() throws DuplicateProductException, InvalidProductDataException, ProductNotFoundException {
-        Product p = new Product(6, "Apple", "Grocery", 30, 1.99);
+        Product p = new Product(6, "Apple", "Grocery", 30, 1.99, 10);
         manager.addProduct(p);
 
         Product found = manager.searchProduct("Apple");
         assertEquals("Apple", found.getName());
+        assertEquals(10, found.getThreshold());
     }
 
     @Test
@@ -129,8 +132,8 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Search products by category successfully")
     void testSearchByCategory() throws DuplicateProductException, InvalidProductDataException, ProductNotFoundException {
-        Product p1 = new Product(7, "Shirt", "Clothes", 10, 19.99);
-        Product p2 = new Product(8, "Pants", "Clothes", 5, 29.99);
+        Product p1 = new Product(7, "Shirt", "Clothes", 10, 19.99, 10);
+        Product p2 = new Product(8, "Pants", "Clothes", 5, 29.99, 10);
         manager.addProduct(p1);
         manager.addProduct(p2);
 
@@ -149,7 +152,7 @@ class InventoryManagerTest {
     @Test
     @DisplayName("Display inventory should not throw exception")
     void testDisplayInventory() throws DuplicateProductException, InvalidProductDataException {
-        Product p = new Product(9, "Notebook", "Stationery", 100, 2.49);
+        Product p = new Product(9, "Notebook", "Stationery", 100, 2.49, 10);
         manager.addProduct(p);
 
         assertDoesNotThrow(() -> manager.displayInventory());

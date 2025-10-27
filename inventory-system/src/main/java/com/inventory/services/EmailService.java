@@ -64,6 +64,47 @@ public class EmailService {
 
     }
 
+    public static void sendAlert(String toEmail, String sub, String msg) {
+
+        final String fromEmail = System.getenv("MY_EMAIL"); // email address
+        final String password = System.getenv("APP_PASSWORD"); // App password
+
+        if (fromEmail == null || password == null) {
+            throw new RuntimeException("Email credentials not set in environment variables!");
+        }
+
+        // Gmail SMTP configuration
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        // session creation
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, password);
+            }
+        });
+
+        try {
+            // Compose message
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(fromEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(sub);
+            message.setText(msg);
+            Transport.send(message);
+
+        
+
+        } catch (Exception e) {
+            System.out.println("Error sending alert: " + e.getMessage());
+        }
+
+    }
+
      // Send OTP to the user's email
     public static void sendOTP(String toEmail, String otp) {
 

@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS products (
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50), 
     quantity INT NOT NULL,
-    price DOUBLE NOT NULL
+    price DOUBLE NOT NULL,
+    threshold INT DEFAULT 10
 );
 
 

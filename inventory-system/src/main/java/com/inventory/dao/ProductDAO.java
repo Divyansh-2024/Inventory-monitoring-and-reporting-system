@@ -12,5 +12,6 @@ void addProduct(Product product) throws SQLException;
     boolean deleteProduct(int id) throws SQLException;
     Product getProductById(int id) throws SQLException;
     List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws SQLException;
+    List<Product> getLowStockProducts();
 
 }
