@@ -17,7 +17,6 @@ public class InventoryManager {
 
     // ANSI Colors
     private static final String RESET = "\u001B[0m";
-    private static final String GREEN_BOLD = "\u001B[1;32m";
     private static final String RED_BOLD = "\u001B[1;31m";
     private static final String YELLOW_BOLD = "\u001B[1;33m";
     private static final String BLUE_BOLD = "\u001B[1;34m";
@@ -32,7 +31,7 @@ public class InventoryManager {
         this.productDAO = productDAO;
     }
 
-    // ✅ Add product
+    //  Add product
     public void addProduct(Product product) throws DuplicateProductException, InvalidProductDataException {
         if (product == null || product.getId() <= 0 || product.getName() == null || product.getName().isEmpty()
                 || product.getQuantity() < 0 || product.getPrice() < 0) {
@@ -52,20 +51,18 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Remove product
+    //  Remove product
     public void removeProduct(int id) throws ProductNotFoundException {
         try {
             if (!productDAO.deleteProduct(id)) {
                 throw new ProductNotFoundException("Product not found with ID: " + id);
-            } else {
-                System.out.println(GREEN_BOLD + "Product removed successfully!" + RESET);
             }
         } catch (SQLException e) {
             System.out.println(RED_BOLD + "Database error while removing product: " + e.getMessage() + RESET);
         }
     }
 
-    // ✅ Update quantity
+    //  Update quantity
     public void updateProductQty(int id, int qty) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -82,7 +79,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Search by name
+    //  Search by name
     public Product searchProduct(String name) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -100,7 +97,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Display all
+    //  Display all
     public void displayInventory() {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -115,7 +112,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Search by ID
+    //  Search by ID
     public Product searchProductById(int id) throws ProductNotFoundException {
         try {
             Product product = productDAO.getProductById(id);
@@ -131,7 +128,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Search by category
+    //  Search by category
     public List<Product> searchProductByCategory(String category) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -154,7 +151,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Price range search
+    //  Price range search
     public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws ProductNotFoundException {
         try {
             List<Product> filteredProducts = productDAO.getProductsByPriceRange(minPrice, maxPrice);
@@ -177,7 +174,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Get all products (for CSV/email report)
+    //  Get all products (for CSV/email report)
     public List<Product> getAllProducts() {
         try {
             return productDAO.getAllProducts();
@@ -187,7 +184,7 @@ public class InventoryManager {
         }
     }
 
-    // ✅ Print product table
+    //  Print product table
     public void printProductTable(List<Product> products) {
         if (products.isEmpty()) {
             System.out.println(YELLOW_BOLD + "⚠️ No products to display!" + RESET);

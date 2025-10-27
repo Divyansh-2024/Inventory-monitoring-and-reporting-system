@@ -33,7 +33,7 @@ public class App {
         StockAlertService alertService = new StockAlertService();
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-        scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 1, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 5, TimeUnit.MINUTES);
         System.out.println("Stock alert scheduler started...");
 
         userService = new UserService(); // initialize here to handle SQLException
@@ -106,13 +106,13 @@ public class App {
         System.out.println(PURPLE + "\n╔═══════════════════════════════════╗" + RESET);
         System.out.println(PURPLE + "║" + CYAN + "     PRODUCT SEARCH OPTIONS        " + PURPLE + "║" + RESET);
         System.out.println(PURPLE + "╚═══════════════════════════════════╝" + RESET);
-        System.out.println(CYAN +"╔════╔══════════════════════════════╗");
-        System.out.println(CYAN +"║ 1. ║ Search by ID                 ║");
-        System.out.println(CYAN +"║ 2. ║ Search by Name               ║");
-        System.out.println(CYAN +"║ 3. ║ Search by Category           ║");
+        System.out.println(CYAN +"╔════╔══════════════════════════════╗" + RESET);
+        System.out.println(CYAN +"║ 1. ║ Search by ID                 ║" + RESET);
+        System.out.println(CYAN +"║ 2. ║ Search by Name               ║" + RESET);
+        System.out.println(CYAN +"║ 3. ║ Search by Category           ║" + RESET);
         System.out.println(CYAN +"║ 4. ║ Search by Price Range        ║" + RESET);
-        System.out.println(CYAN +"╚════╚══════════════════════════════╝");
-        System.out.print(YELLOW + " Enter your choice: " + RESET);
+        System.out.println(CYAN +"╚════╚══════════════════════════════╝" + RESET);
+        System.out.print(YELLOW + " Enter your choice (1-4): " + RESET);
     }
 
     // =========================================================
@@ -288,7 +288,7 @@ public class App {
                     case 1 -> manager.displayInventory();
                     case 2 -> handleSearchMenu();
                     case 3 -> generateAndSendReport("User");
-                    case 4 -> running = false; // logout → exit menu loop
+                    case 4 -> running = false;
                     default -> printWarning("Invalid option! Try again.");
                 }
             } catch (Exception e) {
@@ -364,7 +364,7 @@ public class App {
     }
 
     private static void searchById() throws SQLException {
-        System.out.print(CYAN + "Enter product ID: " + RESET);
+        System.out.print(CYAN + "Enter product ID: ");
         int id = readInt();
         try {
             manager.searchProductById(id);
