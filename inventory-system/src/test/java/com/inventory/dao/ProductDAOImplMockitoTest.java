@@ -25,8 +25,8 @@ class ProductDAOImplMockitoTest {
 
     @Test
     void testGetProductsByPriceRange() throws SQLException {
-        Product p1 = new Product(1, "Mock1", "Cat1", 5, 150.0);
-        Product p2 = new Product(2, "Mock2", "Cat2", 3, 300.0);
+        Product p1 = new Product(1, "Mock1", "Cat1", 5, 150.0, 10);
+        Product p2 = new Product(2, "Mock2", "Cat2", 3, 300.0, 10);
 
         when(productDAO.getProductsByPriceRange(100.0, 400.0)).thenReturn(Arrays.asList(p1, p2));
 
@@ -40,7 +40,7 @@ class ProductDAOImplMockitoTest {
 
     @Test
     void testAddProduct() throws SQLException {
-        Product p = new Product(10, "MockAdd", "CatAdd", 1, 50.0);
+        Product p = new Product(10, "MockAdd", "CatAdd", 1, 50.0, 10);
         doNothing().when(productDAO).addProduct(p);
 
         productDAO.addProduct(p);
@@ -57,7 +57,7 @@ class ProductDAOImplMockitoTest {
 
     @Test
     void testUpdateProduct() throws SQLException {
-        Product p = new Product(11, "MockUpdate", "CatUpdate", 2, 75.0);
+        Product p = new Product(11, "MockUpdate", "CatUpdate", 2, 75.0, 10);
         doNothing().when(productDAO).updateProduct(p);
 
         productDAO.updateProduct(p);
@@ -67,8 +67,8 @@ class ProductDAOImplMockitoTest {
     @Test
     void testGetAllProducts() throws SQLException {
         List<Product> mockList = Arrays.asList(
-                new Product(1, "A", "CatA", 5, 100.0),
-                new Product(2, "B", "CatB", 10, 200.0)
+                new Product(1, "A", "CatA", 5, 100.0, 10),
+                new Product(2, "B", "CatB", 10, 200.0, 10)
         );
         when(productDAO.getAllProducts()).thenReturn(mockList);
 
@@ -77,4 +77,3 @@ class ProductDAOImplMockitoTest {
         verify(productDAO, times(1)).getAllProducts();
     }
 }
-

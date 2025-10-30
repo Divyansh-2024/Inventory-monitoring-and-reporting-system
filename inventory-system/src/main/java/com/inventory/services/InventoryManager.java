@@ -13,15 +13,28 @@ import java.util.ArrayList;
 
 public class InventoryManager {
 
-    private ProductDAO productDAO;
+    private final ProductDAO productDAO;
+
+    // ANSI Colors
+    private static final String RESET = "\u001B[0m";
+    private static final String RED_BOLD = "\u001B[1;31m";
+    private static final String YELLOW_BOLD = "\u001B[1;33m";
+    private static final String BLUE_BOLD = "\u001B[1;34m";
+    private static final String CYAN_BOLD = "\u001B[1;36m";
+    private static final String MAGENTA_BOLD = "\u001B[1;35m";
 
     public InventoryManager() {
         productDAO = new ProductDAOImpl();
     }
 
-    // Add product
+    public InventoryManager(ProductDAO productDAO) {
+        this.productDAO = productDAO;
+    }
+
+    //  Add product
     public void addProduct(Product product) throws DuplicateProductException, InvalidProductDataException {
-        if (product == null || product.getId() <= 0 || product.getName() == null || product.getName().isEmpty()) {
+        if (product == null || product.getId() <= 0 || product.getName() == null || product.getName().isEmpty()
+                || product.getQuantity() < 0 || product.getPrice() < 0) {
             throw new InvalidProductDataException("Invalid product data provided!");
         }
 
@@ -34,24 +47,22 @@ public class InventoryManager {
             }
             productDAO.addProduct(product);
         } catch (SQLException e) {
-            System.out.println("Database error while adding product: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while adding product: " + e.getMessage() + RESET);
         }
     }
 
-    // Remove product
+    //  Remove product
     public void removeProduct(int id) throws ProductNotFoundException {
         try {
             if (!productDAO.deleteProduct(id)) {
                 throw new ProductNotFoundException("Product not found with ID: " + id);
-            } else {
-                System.out.println("Product removed successfully!");
             }
         } catch (SQLException e) {
-            System.out.println("Database error while removing product: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while removing product: " + e.getMessage() + RESET);
         }
     }
 
-    // Update product quantity
+    //  Update quantity
     public void updateProductQty(int id, int qty) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -59,65 +70,65 @@ public class InventoryManager {
                 if (p.getId() == id) {
                     p.setQuantity(qty);
                     productDAO.updateProduct(p);
-                    System.out.println("Quantity updated successfully for product ID " + id);
                     return;
                 }
             }
             throw new ProductNotFoundException("Product not found with ID: " + id);
         } catch (SQLException e) {
-            System.out.println("Database error while updating product: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while updating product: " + e.getMessage() + RESET);
         }
     }
 
-    // Search product by name
+    //  Search by name
     public Product searchProduct(String name) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
             for (Product p : products) {
                 if (p.getName().equalsIgnoreCase(name)) {
+                    System.out.println(CYAN_BOLD + "\n Product found:" + RESET);
                     printProductTable(List.of(p));
                     return p;
                 }
             }
             throw new ProductNotFoundException("Product not found with name: " + name);
         } catch (SQLException e) {
-            System.out.println("Database error while searching product: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while searching product: " + e.getMessage() + RESET);
             return null;
         }
     }
 
-    // Display all products
+    //  Display all
     public void displayInventory() {
         try {
             List<Product> products = productDAO.getAllProducts();
             if (products.isEmpty()) {
-                System.out.println("Inventory is empty.");
+                System.out.println(YELLOW_BOLD + "⚠️ Inventory is empty." + RESET);
             } else {
+                System.out.println(BLUE_BOLD + "\nCOMPLETE INVENTORY LIST:" + RESET);
                 printProductTable(products);
             }
         } catch (SQLException e) {
-            System.out.println("Database error while displaying inventory: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while displaying inventory: " + e.getMessage() + RESET);
         }
     }
 
-    // Search product by ID
+    //  Search by ID
     public Product searchProductById(int id) throws ProductNotFoundException {
         try {
-            List<Product> products = productDAO.getAllProducts();
-            for (Product p : products) {
-                if (p.getId() == id) {
-                    printProductTable(List.of(p));
-                    return p;
-                }
+            Product product = productDAO.getProductById(id);
+            if (product == null) {
+                throw new ProductNotFoundException("Product not found with ID: " + id);
             }
-            throw new ProductNotFoundException("Product not found with ID: " + id);
+            System.out.println(CYAN_BOLD + "\nProduct details for ID " + id + ":" + RESET);
+            printProductTable(List.of(product));
+            return product;
         } catch (SQLException e) {
-            System.out.println("Database error while searching product by ID: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while searching product by ID: " + e.getMessage() + RESET);
             return null;
         }
     }
 
-    // Search by category
+    //  Search by category
     public List<Product> searchProductByCategory(String category) throws ProductNotFoundException {
         try {
             List<Product> products = productDAO.getAllProducts();
@@ -130,55 +141,72 @@ public class InventoryManager {
             if (results.isEmpty()) {
                 throw new ProductNotFoundException("No products found in category: " + category);
             } else {
+                System.out.println(CYAN_BOLD + "\n Products in category: " + category + RESET);
                 printProductTable(results);
             }
             return results;
         } catch (SQLException e) {
-            System.out.println("Database error while searching by category: " + e.getMessage());
+            System.out.println(RED_BOLD + "Database error while searching by category: " + e.getMessage() + RESET);
             return new ArrayList<>();
         }
     }
 
-    // Print products in table format
+    //  Price range search
+    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws ProductNotFoundException {
+        try {
+            List<Product> filteredProducts = productDAO.getProductsByPriceRange(minPrice, maxPrice);
+
+            if (filteredProducts.isEmpty()) {
+                throw new ProductNotFoundException(
+                        "⚠️ No products found in the price range " + minPrice + " - " + maxPrice);
+            } else {
+                System.out.println(
+                        CYAN_BOLD + "\n Products priced between " + minPrice + " and " + maxPrice + ":" + RESET);
+                printProductTable(filteredProducts);
+            }
+
+            return filteredProducts;
+
+        } catch (SQLException e) {
+            System.out.println(
+                    RED_BOLD + "Database error while fetching products by price range: " + e.getMessage() + RESET);
+            return new ArrayList<>();
+        }
+    }
+
+    //  Get all products (for CSV/email report)
+    public List<Product> getAllProducts() {
+        try {
+            return productDAO.getAllProducts();
+        } catch (SQLException e) {
+            System.out.println(RED_BOLD + "Database error while getting all products: " + e.getMessage() + RESET);
+            return new ArrayList<>();
+        }
+    }
+
+    //  Print product table
     public void printProductTable(List<Product> products) {
         if (products.isEmpty()) {
-            System.out.println("No products to display!");
+            System.out.println(YELLOW_BOLD + "⚠️ No products to display!" + RESET);
             return;
         }
 
-        System.out.println("\nInventory List:");
-        System.out.println("┌──────┬──────────────────────────────┬───────────────────────┬───────────┬───────────┐");
-        System.out.printf("| %-4s | %-28s | %-21s | %-9s | %-9s |\n",
-                "ID", "Name", "Category", "Qty", "Price");
-        System.out.println("├──────┼──────────────────────────────┼───────────────────────┼───────────┼───────────┤");
+        System.out.println(MAGENTA_BOLD
+                + "┌──────┬──────────────────────────────┬───────────────────────┬───────────┬───────────┬───────────┐"
+                + RESET);
+        System.out.printf(MAGENTA_BOLD + "| %-4s | %-28s | %-21s | %-9s | %-9s | %-9s |\n" + RESET,
+                "ID", "Name", "Category", "Qty", "Price", "Threshold");
+        System.out.println(MAGENTA_BOLD
+                + "├──────┼──────────────────────────────┼───────────────────────┼───────────┼───────────┼───────────┤"
+                + RESET);
 
         for (Product p : products) {
-            System.out.printf("| %-4d | %-28s | %-21s | %-9d | %-9.2f |\n",
-                    p.getId(), p.getName(), p.getCategory(), p.getQuantity(), p.getPrice());
+            System.out.printf(BLUE_BOLD + "| %-4d | %-28s | %-21s | %-9d | %-9.2f | %-9d |\n" + RESET,
+                    p.getId(), p.getName(), p.getCategory(), p.getQuantity(), p.getPrice(), p.getThreshold());
         }
 
-        System.out.println("└──────┴──────────────────────────────┴───────────────────────┴───────────┴───────────┘");
+        System.out.println(MAGENTA_BOLD
+                + "└──────┴──────────────────────────────┴───────────────────────┴───────────┴───────────┴───────────┘"
+                + RESET);
     }
-
-    // Search products by price range
-    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws ProductNotFoundException {
-    try {
-        List<Product> filteredProducts = productDAO.getProductsByPriceRange(minPrice, maxPrice);
-
-        if (filteredProducts.isEmpty()) {
-            throw new ProductNotFoundException("No products found in the price range: " + minPrice + " - " + maxPrice);
-        } else {
-            System.out.println("\nProducts in price range " + minPrice + " - " + maxPrice + ":");
-            printProductTable(filteredProducts);
-        }
-
-        return filteredProducts;
-
-    } catch (SQLException e) {
-        System.out.println("Database error while fetching products by price range: " + e.getMessage());
-        return new ArrayList<>();
-    }
-}
-
-
 }
