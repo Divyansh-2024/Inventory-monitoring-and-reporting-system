@@ -30,11 +30,11 @@ public class App {
     private static final String BOLD = "\u001B[1m";
 
     public static void main(String[] args) throws SQLException {
-        StockAlertService alertService = new StockAlertService();
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        // StockAlertService alertService = new StockAlertService();
+        // ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-        scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 5, TimeUnit.MINUTES);
-        System.out.println("Stock alert scheduler started...");
+        // scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 5, TimeUnit.MINUTES);
+        // System.out.println("Stock alert scheduler started...");
 
         userService = new UserService(); // initialize here to handle SQLException
 
@@ -158,7 +158,7 @@ public class App {
                     return null;
                 }
                 printSuccess(BOLD + "Login successful! Welcome, " + user.getUserName());
-                System.out.println(BOLD + "Role: " + user.getRole().toUpperCase());
+                System.out.println(GREEN + BOLD + "Role: " + user.getRole().toUpperCase());
                 return user;
             } else {
                 printError("Invalid username or password!");
@@ -202,7 +202,7 @@ public class App {
     }
 
     private static void verifyEmailMenu() {
-        System.out.println("==========Email Verification==========");
+        System.out.println( PURPLE + "==========Email Verification==========" + RESET);
         System.out.print("Enter your registered email: ");
         String email = sc.nextLine();
 
@@ -220,7 +220,7 @@ public class App {
             // Generate OTP
             String otp = OTPService.generateOTP(email);
 
-            // ✅ Send OTP to email using real mail service
+            // Send OTP to email using real mail service
             EmailService.sendOTP(email, otp);
             printInfo("OTP has been sent to your registered email address.");
 
@@ -246,12 +246,12 @@ public class App {
     // ADMIN / USER MENU HANDLERS
     // =========================================================
     private static void handleAdminMenu(User currentUser) {
-        // new Thread(()->{
-        //     StockAlertService alertService=new StockAlertService();
-        //     ScheduledExecutorService scheduler=Executors.newScheduledThreadPool(1);
+        new Thread(()->{
+            StockAlertService alertService=new StockAlertService();
+            ScheduledExecutorService scheduler=Executors.newScheduledThreadPool(1);
 
-        //     scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 5, TimeUnit.MINUTES);
-        // }).start();
+            scheduler.scheduleAtFixedRate(alertService::checkStockAlert, 0, 5, TimeUnit.MINUTES);
+        }).start();
         boolean running = true;
         while (running) {
             printInventoryMenu(true);
@@ -364,6 +364,7 @@ public class App {
     }
 
     private static void searchById() throws SQLException {
+        System.out.println(PURPLE + "=========== SEARCH BY ID ==========" + RESET);
         System.out.print(CYAN + "Enter product ID: ");
         int id = readInt();
         try {
@@ -374,6 +375,7 @@ public class App {
     }
 
     private static void searchByName() throws SQLException {
+        System.out.println(PURPLE + "=========== SEARCH BY NAME ==========" + RESET);
         System.out.print(CYAN + "Enter product name: " + RESET);
         String name = sc.nextLine();
         try {
@@ -384,6 +386,7 @@ public class App {
     }
 
     private static void searchByCategory() throws SQLException {
+        System.out.println(PURPLE + "=========== SEARCH BY CATEGORY ==========" + RESET);
         System.out.print(CYAN + "Enter category: " + RESET);
         String category = sc.nextLine();
         try {
@@ -394,6 +397,7 @@ public class App {
     }
 
     private static void searchByPriceRange() throws SQLException {
+        System.out.println(PURPLE + "=========== SEARCH BY PRICE RANGE ==========" + RESET);
         System.out.print(CYAN + "Enter min price: " + RESET);
         double min = readDouble();
         System.out.print(CYAN + "Enter max price: " + RESET);

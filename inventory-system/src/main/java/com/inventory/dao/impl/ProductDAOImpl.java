@@ -15,7 +15,7 @@ public class ProductDAOImpl implements ProductDAO {
     public void addProduct(Product product) {
         String sql = "INSERT INTO products (id, name, category, quantity, price, threshold) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, product.getId());
             stmt.setString(2, product.getName());
@@ -37,8 +37,8 @@ public class ProductDAOImpl implements ProductDAO {
         String sql = "SELECT * FROM products";
 
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 products.add(mapToProduct(rs));
@@ -55,7 +55,7 @@ public class ProductDAOImpl implements ProductDAO {
     public Product getProductById(int id) {
         String sql = "SELECT * FROM products WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -73,7 +73,7 @@ public class ProductDAOImpl implements ProductDAO {
     public void updateProduct(Product product) {
         String sql = "UPDATE products SET name=?, category=?, quantity=?, price=?, threshold=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, product.getName());
             stmt.setString(2, product.getCategory());
@@ -83,9 +83,7 @@ public class ProductDAOImpl implements ProductDAO {
             stmt.setInt(6, product.getId());
 
             int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                System.out.println("Product updated with ID: " + product.getId());
-            } else {
+            if (rows < 0) {
                 System.out.println("⚠️ No product found with ID: " + product.getId());
             }
 
@@ -99,7 +97,7 @@ public class ProductDAOImpl implements ProductDAO {
     public boolean deleteProduct(int id) {
         String sql = "DELETE FROM products WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             int rows = stmt.executeUpdate();
@@ -118,7 +116,7 @@ public class ProductDAOImpl implements ProductDAO {
         String sql = "SELECT * FROM products WHERE price BETWEEN ? AND ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setDouble(1, minPrice);
             stmt.setDouble(2, maxPrice);
@@ -139,8 +137,8 @@ public class ProductDAOImpl implements ProductDAO {
         String sql = "SELECT * FROM products WHERE quantity < threshold";
 
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 lowStockProducts.add(mapToProduct(rs));
@@ -161,7 +159,6 @@ public class ProductDAOImpl implements ProductDAO {
                 rs.getString("category"),
                 rs.getInt("quantity"),
                 rs.getDouble("price"),
-                rs.getInt("threshold")
-        );
+                rs.getInt("threshold"));
     }
 }
