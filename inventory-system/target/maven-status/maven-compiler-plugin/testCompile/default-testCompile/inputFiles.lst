@@ -1,0 +1,10 @@
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/AppTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/dao/ProductDAOImplMockitoTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/dao/ProductDaoImplTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/dao/UserDAOImplTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/model/ProductValidationTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/services/InventoryManagerTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/services/OTPServiceTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/services/StockAlertServiceTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/services/UserServiceTest.java
+/workspaces/Inventory-monitoring-and-reporting-system/inventory-system/src/test/java/com/inventory/utility/CSVHelperTest.java

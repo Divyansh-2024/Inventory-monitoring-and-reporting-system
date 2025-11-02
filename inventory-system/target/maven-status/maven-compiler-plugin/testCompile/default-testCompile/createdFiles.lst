@@ -1,0 +1,11 @@
+com/inventory/services/UserServiceTest.class
+com/inventory/utility/CSVHelperTest.class
+com/inventory/services/OTPServiceTest.class
+com/inventory/dao/ProductDAOImplTest.class
+com/inventory/services/StockAlertServiceTest$1.class
+com/inventory/dao/ProductDAOImplMockitoTest.class
+com/inventory/services/StockAlertServiceTest.class
+com/inventory/model/ProductValidationTest.class
+com/inventory/dao/UserDAOImplTest.class
+com/inventory/services/InventoryManagerTest.class
+com/inventory/AppTest.class
